@@ -6,5 +6,7 @@ public class ErrorMessage {
     public static final String USER_ALREADY_EXISTS = "User Already Exists";
     public static final String MECHANIC_NOT_FOUND = "Mechic Not Found";
     public static final String MECHANIC_ALREADY_EXISTS = "Mechic Already Exists";
+    public static final String VEHICLE_NOT_FOUND = "Vehicle Not Found";
+
 
 }
