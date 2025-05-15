@@ -1,9 +1,6 @@
 package az.hamburg.autoservice.exception;
 
-import az.hamburg.autoservice.exception.handler.MechanicAlreadyExistsException;
-import az.hamburg.autoservice.exception.handler.MechanicNotFoundException;
-import az.hamburg.autoservice.exception.handler.UserAlreadyExistsException;
-import az.hamburg.autoservice.exception.handler.UserNotFoundException;
+import az.hamburg.autoservice.exception.handler.*;
 import ch.qos.logback.core.model.processor.ModelHandlerException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ProblemDetail;
@@ -40,6 +37,12 @@ public class CustomException {
     @ResponseStatus(CONFLICT)
     public ProblemDetail handlerMechanicAlreadyExists(MechanicAlreadyExistsException e){
         return ProblemDetail.forStatusAndDetail(CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(VehicleNotFoundException.class)
+    @ResponseStatus(NOT_FOUND)
+    public ProblemDetail handlerVehicleNotFound(VehicleNotFoundException e){
+        return ProblemDetail.forStatusAndDetail(NOT_FOUND, e.getMessage());
     }
 
 }
