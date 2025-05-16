@@ -51,4 +51,10 @@ public class CustomException {
         return ProblemDetail.forStatusAndDetail(NOT_FOUND, e.getMessage());
     }
 
+    @ExceptionHandler(AppointmentMechanicNotFoundException.class)
+    @ResponseStatus(NOT_FOUND)
+    public ProblemDetail handlerAppointmentMechanicNotFound(AppointmentMechanicNotFoundException e){
+        return ProblemDetail.forStatusAndDetail(NOT_FOUND, e.getMessage());
+    }
+
 }
