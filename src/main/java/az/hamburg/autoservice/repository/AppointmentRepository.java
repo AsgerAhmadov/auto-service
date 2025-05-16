@@ -1,4 +1,8 @@
 package az.hamburg.autoservice.repository;
 
-public interface AppointmentRepository {
+import az.hamburg.autoservice.domain.Appointment;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+
 }

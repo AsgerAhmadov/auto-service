@@ -45,4 +45,10 @@ public class CustomException {
         return ProblemDetail.forStatusAndDetail(NOT_FOUND, e.getMessage());
     }
 
+    @ExceptionHandler(AppointmentNotFoundException.class)
+    @ResponseStatus(NOT_FOUND)
+    public ProblemDetail handlerAppointmentNotFound(AppointmentNotFoundException e){
+        return ProblemDetail.forStatusAndDetail(NOT_FOUND, e.getMessage());
+    }
+
 }
