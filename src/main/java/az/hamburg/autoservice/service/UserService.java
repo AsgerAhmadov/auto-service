@@ -1,6 +1,7 @@
 package az.hamburg.autoservice.service;
 
 import az.hamburg.autoservice.model.user.request.UserCreateRequest;
+import az.hamburg.autoservice.model.user.request.UserLoginRequest;
 import az.hamburg.autoservice.model.user.request.UserUpdateRequest;
 import az.hamburg.autoservice.model.user.response.UserCreateResponse;
 import az.hamburg.autoservice.model.user.response.UserReadResponse;
@@ -19,5 +20,7 @@ public interface UserService {
     UserUpdateResponse update(Long id , UserUpdateRequest updateRequest);
 
     void delete (Long id);
+
+     String loginUser(UserLoginRequest request);
 
 }

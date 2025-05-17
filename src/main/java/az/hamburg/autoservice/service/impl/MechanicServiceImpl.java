@@ -34,7 +34,6 @@ public class MechanicServiceImpl implements MechanicService {
     public MechanicCreateResponse create(MechanicCreateRequest mechanicCreateRequest) {
 
         Mechanic mechanic = mechanicMapper.createRequestToEntity(mechanicCreateRequest);
-        mechanic.setRoleType(RoleType.USER);
         mechanicRepository.save(mechanic);
         return mechanicMapper.entityToCreateResponse(mechanic);
 
@@ -46,7 +45,6 @@ public class MechanicServiceImpl implements MechanicService {
         Mechanic foundedMechanic = mechanicRepository
                 .findById(id).orElseThrow(() -> new MechanicNotFoundException(ErrorMessage.MECHANIC_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
         Mechanic savedMechanic = mechanicMapper.updateRequestToEntity(updateRequest);
-        savedMechanic.setRoleType(RoleType.USER);
         mechanicRepository.save(savedMechanic);
         return mechanicMapper.entityToUpdateResponse(foundedMechanic);
 

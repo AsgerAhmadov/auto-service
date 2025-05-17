@@ -6,6 +6,7 @@ import az.hamburg.autoservice.exception.error.ErrorMessage;
 import az.hamburg.autoservice.exception.handler.UserNotFoundException;
 import az.hamburg.autoservice.mappers.UserMapper;
 import az.hamburg.autoservice.model.user.request.UserCreateRequest;
+import az.hamburg.autoservice.model.user.request.UserLoginRequest;
 import az.hamburg.autoservice.model.user.request.UserUpdateRequest;
 import az.hamburg.autoservice.model.user.response.UserCreateResponse;
 import az.hamburg.autoservice.model.user.response.UserReadResponse;
@@ -74,6 +75,18 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
         userRepository.deleteById(user.getId());
+    }
+
+    @Override
+    public String loginUser(UserLoginRequest request) {
+
+        User foundUser = userRepository.findByUsernameAndPassword(request.getUsername(), request.getPassword())
+                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
+
+        if (foundUser != null) {
+            return "login successful";
+        }
+        return "login failed";
     }
 
 }
