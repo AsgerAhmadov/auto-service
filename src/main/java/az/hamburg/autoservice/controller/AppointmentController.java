@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("v1/appointments")
+@RequestMapping("api/appointments")
 @RequiredArgsConstructor
 @Tag(name = "Appointment Controller API", description = "Managing Appointment Apis")
 @CrossOrigin(allowedHeaders = "*", origins = "*")

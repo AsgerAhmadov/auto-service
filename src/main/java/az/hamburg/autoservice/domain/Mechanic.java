@@ -21,6 +21,4 @@ public class Mechanic extends BaseDomain{
     private String email;
     private String specialty;
 
-    @Enumerated(EnumType.STRING)
-    private RoleType roleType;
 }

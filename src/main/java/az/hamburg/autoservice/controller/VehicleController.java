@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("v1/vehicles")
+@RequestMapping("api/vehicles")
 @RequiredArgsConstructor
 @Tag(name = "Vehicle Controller API", description = "Managing Vehicle Apis")
 @CrossOrigin(allowedHeaders = "*", origins = "*")
