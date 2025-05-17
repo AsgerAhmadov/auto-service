@@ -1,6 +1,7 @@
 package az.hamburg.autoservice.service.impl;
 
 import az.hamburg.autoservice.domain.Appointment;
+import az.hamburg.autoservice.domain.RequestStatus;
 import az.hamburg.autoservice.exception.error.ErrorMessage;
 import az.hamburg.autoservice.exception.handler.AppointmentNotFoundException;
 import az.hamburg.autoservice.mappers.AppointmentMapper;
@@ -29,6 +30,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public AppointmentCreateResponse create(AppointmentCreateRequest createRequest) {
         Appointment entity = appointmentMapper.createRequestToEntity(createRequest);
+        entity.setStatus(RequestStatus.PENDING);
         appointmentRepository.save(entity);
         return appointmentMapper.entityToCreateResponse(entity);
     }

@@ -1,11 +1,10 @@
 package az.hamburg.autoservice.controller;
 
 import az.hamburg.autoservice.model.mechanic.request.MechanicCreateRequest;
+import az.hamburg.autoservice.model.mechanic.request.MechanicUpdateRequest;
 import az.hamburg.autoservice.model.mechanic.response.MechanicCreateResponse;
 import az.hamburg.autoservice.model.mechanic.response.MechanicReadResponse;
-import az.hamburg.autoservice.model.user.request.UserCreateRequest;
-import az.hamburg.autoservice.model.user.response.UserCreateResponse;
-import az.hamburg.autoservice.model.user.response.UserReadResponse;
+import az.hamburg.autoservice.model.mechanic.response.MechanicUpdateResponse;
 import az.hamburg.autoservice.service.MechanicService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -46,6 +45,12 @@ public class MechanicController {
     @ResponseStatus(HttpStatus.OK)
     public List<MechanicReadResponse> getAll() {
         return mechanicService.getAll();
+    }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public MechanicUpdateResponse update(@PathVariable Long id, @RequestBody MechanicUpdateRequest updateRequest) {
+        return mechanicService.update(id, updateRequest);
     }
 
 }

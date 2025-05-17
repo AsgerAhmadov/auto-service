@@ -1,8 +1,10 @@
 package az.hamburg.autoservice.controller;
 
 import az.hamburg.autoservice.model.user.request.UserCreateRequest;
+import az.hamburg.autoservice.model.user.request.UserUpdateRequest;
 import az.hamburg.autoservice.model.user.response.UserCreateResponse;
 import az.hamburg.autoservice.model.user.response.UserReadResponse;
+import az.hamburg.autoservice.model.user.response.UserUpdateResponse;
 import az.hamburg.autoservice.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -43,6 +45,12 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public List<UserReadResponse> getAll() {
         return userService.getAll();
+    }
+
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserUpdateResponse update(@PathVariable Long id, @RequestBody UserUpdateRequest updateRequest) {
+        return userService.update(id, updateRequest);
     }
 
 }
