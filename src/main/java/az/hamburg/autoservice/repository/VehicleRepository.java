@@ -1,4 +1,8 @@
 package az.hamburg.autoservice.repository;
 
-public interface VehicleRepository {
+import az.hamburg.autoservice.domain.Vehicle;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
+
 }
