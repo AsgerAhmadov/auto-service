@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface AppointmentService {
 
-    AppointmentCreateResponse create(AppointmentCreateRequest createRequest);
+    AppointmentCreateResponse create(Long vehicleId ,AppointmentCreateRequest createRequest);
 
     AppointmentUpdateResponse update(Long id, AppointmentUpdateRequest updateRequest);
 

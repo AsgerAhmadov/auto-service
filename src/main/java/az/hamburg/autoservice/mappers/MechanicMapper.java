@@ -7,6 +7,7 @@ import az.hamburg.autoservice.model.mechanic.response.MechanicCreateResponse;
 import az.hamburg.autoservice.model.mechanic.response.MechanicReadResponse;
 import az.hamburg.autoservice.model.mechanic.response.MechanicUpdateResponse;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE,
@@ -20,7 +21,7 @@ public interface MechanicMapper {
 
     MechanicReadResponse entityToReadResponse(Mechanic mechanic);
 
-    Mechanic updateRequestToEntity(MechanicUpdateRequest updateRequest);
+    Mechanic updateRequestToEntity(@MappingTarget Mechanic mechanic, MechanicUpdateRequest updateRequest);
 
     MechanicUpdateResponse entityToUpdateResponse(Mechanic mechanic);
 

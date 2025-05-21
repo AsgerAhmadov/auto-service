@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class VehicleUpdateResponse {
     private Long id;
-
+    private Long userId;
     private String brand;
     private String model;
     private String plateNumber;

@@ -2,8 +2,10 @@ package az.hamburg.autoservice.service.impl;
 
 import az.hamburg.autoservice.domain.Appointment;
 import az.hamburg.autoservice.domain.RequestStatus;
+import az.hamburg.autoservice.domain.Vehicle;
 import az.hamburg.autoservice.exception.error.ErrorMessage;
 import az.hamburg.autoservice.exception.handler.AppointmentNotFoundException;
+import az.hamburg.autoservice.exception.handler.VehicleNotFoundException;
 import az.hamburg.autoservice.mappers.AppointmentMapper;
 import az.hamburg.autoservice.model.appointment.request.AppointmentCreateRequest;
 import az.hamburg.autoservice.model.appointment.request.AppointmentUpdateRequest;
@@ -11,6 +13,7 @@ import az.hamburg.autoservice.model.appointment.response.AppointmentCreateRespon
 import az.hamburg.autoservice.model.appointment.response.AppointmentReadResponse;
 import az.hamburg.autoservice.model.appointment.response.AppointmentUpdateResponse;
 import az.hamburg.autoservice.repository.AppointmentRepository;
+import az.hamburg.autoservice.repository.VehicleRepository;
 import az.hamburg.autoservice.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,10 +29,16 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
+    private final VehicleRepository vehicleRepository;
 
     @Override
-    public AppointmentCreateResponse create(AppointmentCreateRequest createRequest) {
+    public AppointmentCreateResponse create(Long vehicleId,AppointmentCreateRequest createRequest) {
+
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(()-> new VehicleNotFoundException(ErrorMessage.VEHICLE_NOT_FOUND,HttpStatus.NOT_FOUND.name()));
+
         Appointment entity = appointmentMapper.createRequestToEntity(createRequest);
+        entity.setVehicleId(vehicle.getId());
         entity.setStatus(RequestStatus.PENDING);
         appointmentRepository.save(entity);
         return appointmentMapper.entityToCreateResponse(entity);
