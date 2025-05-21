@@ -42,11 +42,11 @@ public class MechanicServiceImpl implements MechanicService {
     @Override
     public MechanicUpdateResponse update(Long id, MechanicUpdateRequest updateRequest) {
 
-        Mechanic foundedMechanic = mechanicRepository
+        Mechanic entity = mechanicRepository
                 .findById(id).orElseThrow(() -> new MechanicNotFoundException(ErrorMessage.MECHANIC_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
-        Mechanic savedMechanic = mechanicMapper.updateRequestToEntity(updateRequest);
+        Mechanic savedMechanic = mechanicMapper.updateRequestToEntity(entity,updateRequest);
         mechanicRepository.save(savedMechanic);
-        return mechanicMapper.entityToUpdateResponse(foundedMechanic);
+        return mechanicMapper.entityToUpdateResponse(savedMechanic);
 
     }
 

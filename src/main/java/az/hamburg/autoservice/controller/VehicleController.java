@@ -22,10 +22,10 @@ public class VehicleController {
 
     private final VehicleService vehicleService;
 
-    @PostMapping
+    @PostMapping("/{userId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public VehicleCreateResponse create( @RequestBody VehicleCreateRequest createRequest) {
-        return vehicleService.create(createRequest);
+    public VehicleCreateResponse create(@PathVariable Long userId, @RequestBody VehicleCreateRequest createRequest) {
+        return vehicleService.create(userId,createRequest);
     }
 
     @GetMapping("/{id}")

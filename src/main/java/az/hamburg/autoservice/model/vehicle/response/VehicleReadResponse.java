@@ -13,7 +13,7 @@ public class VehicleReadResponse {
 
     private Long id;
 
-    private Long userId ;
+    private Long userId;
     private String brand;
     private String model;
     private String plateNumber;

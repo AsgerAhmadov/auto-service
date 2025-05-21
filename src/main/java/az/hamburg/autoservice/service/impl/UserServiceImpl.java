@@ -61,9 +61,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserUpdateResponse update(Long id, UserUpdateRequest updateRequest) {
 
-        User foundedUser = userRepository
+        User entity = userRepository
                 .findById(id).orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
-        User savedUser = userMapper.updateRequestToEntity(updateRequest);
+        User savedUser = userMapper.updateRequestToEntity(entity,updateRequest);
         userRepository.save(savedUser);
 
         return userMapper.entityToUpdateResponse(savedUser);
@@ -87,6 +87,9 @@ public class UserServiceImpl implements UserService {
             return "login successful";
         }
         return "login failed";
+
+        //todo:void qaytaracaq log.info atacam...
+        //todo:encryption
     }
 
 }

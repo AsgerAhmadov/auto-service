@@ -23,10 +23,10 @@ public class AppointmentController {
     
     private final AppointmentService appointmentService;
 
-    @PostMapping
+    @PostMapping("/{vehicleId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public AppointmentCreateResponse create(@RequestBody AppointmentCreateRequest createRequest) {
-        return appointmentService.create(createRequest);
+    public AppointmentCreateResponse create(@PathVariable Long vehicleId,@RequestBody AppointmentCreateRequest createRequest) {
+        return appointmentService.create(vehicleId,createRequest);
     }
 
     @GetMapping("/{id}")
