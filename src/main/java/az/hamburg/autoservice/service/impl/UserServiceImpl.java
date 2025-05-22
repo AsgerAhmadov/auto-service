@@ -3,7 +3,9 @@ package az.hamburg.autoservice.service.impl;
 import az.hamburg.autoservice.domain.RoleType;
 import az.hamburg.autoservice.domain.User;
 import az.hamburg.autoservice.exception.error.ErrorMessage;
+import az.hamburg.autoservice.exception.handler.EmailAlreadyExistsException;
 import az.hamburg.autoservice.exception.handler.UserNotFoundException;
+import az.hamburg.autoservice.exception.handler.WrongPhoneNumberException;
 import az.hamburg.autoservice.mappers.UserMapper;
 import az.hamburg.autoservice.model.user.request.UserCreateRequest;
 import az.hamburg.autoservice.model.user.request.UserLoginRequest;
@@ -18,7 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserCreateResponse create(UserCreateRequest createRequest) {
 
+        String phoneNumber = createRequest.getPhone();
+        String checkNumber = phoneNumber.substring(0, 4);
+        List<String> operatorBeginningsOfAzerbaijan = Arrays.asList("50", "51", "55", "99", "70", "77", "60");
+        String checkOperatorNumber = phoneNumber.substring(4, 6);
+        if (!checkNumber.equals("+994") || !operatorBeginningsOfAzerbaijan.contains(checkOperatorNumber)) {
+            throw new WrongPhoneNumberException(ErrorMessage.NUMBER_IS_WRONG, HttpStatus.BAD_REQUEST.name());
+        }
+
+        List<String> allEmails = userRepository.findAll()
+                .stream().map(User::getEmail)
+                .collect(Collectors.toList());
+        if (allEmails.contains(createRequest.getEmail())){
+            throw new EmailAlreadyExistsException(ErrorMessage.EMAIL_ALREADY_EXISTS, HttpStatus.BAD_REQUEST.name());
+        }
         User user = userMapper.createRequestToEntity(createRequest);
         user.setRoleType(RoleType.USER);
         userRepository.save(user);
