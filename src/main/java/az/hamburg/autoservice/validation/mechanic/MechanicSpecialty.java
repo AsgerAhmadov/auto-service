@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {})
 @NotBlank(message = "MechanicSpecialty bos ola bilmez...")
 public @interface MechanicSpecialty {
-    String message() default "";
+    String message() default "Invalid specialty";
 
     Class<?>[] groups() default {};
 

@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {})
 @NotBlank(message = "UserEmail bos ola bilmez...")
 public @interface UserEmail {
-    String message() default "";
+    String message() default "Invalid email";
 
     Class<?>[] groups() default {};
 

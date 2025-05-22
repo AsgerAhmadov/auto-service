@@ -14,7 +14,7 @@ import java.lang.annotation.*;
 @Size(min = 10, max = 30, message = "UserPassword Uzunlugu 10 ve 30 araliginda olmalidi")
 @NotBlank(message = "UserPassword bos ola bilmez...")
 public @interface UserPassword {
-    String message() default "";
+    String message() default "Invalid password";
 
     Class<?>[] groups() default {};
 

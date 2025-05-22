@@ -14,7 +14,7 @@ import java.lang.annotation.*;
 @NotBlank(message = "MechanicName boş ola bilməz.")
 @Size(max = 255, message = "MechanicName maksimum 255 simvol ola bilər.")
 public @interface MechanicName {
-    String message() default "";
+    String message() default "Invalid name";
 
     Class<?>[] groups() default {};
 
