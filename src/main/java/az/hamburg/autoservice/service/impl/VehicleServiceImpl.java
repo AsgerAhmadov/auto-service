@@ -45,7 +45,7 @@ public class VehicleServiceImpl implements VehicleService {
         List<String> allPlateNumbers = vehicleRepository.findAll()
                 .stream()
                 .map(Vehicle::getPlateNumber)
-                .collect(Collectors.toList());
+                .toList();
         if (allPlateNumbers.contains(createRequest.getPlateNumber())){
             throw new PlateNumberAlreadyExistsException(ErrorMessage.PLATE_NUMBER_ALREADY_EXISTS, HttpStatus.BAD_REQUEST.name());
         }

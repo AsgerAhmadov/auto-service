@@ -26,7 +26,6 @@ public class Appointment extends BaseDomain{
     //gorusu bitirmek
 
     //bide serurity meselesi oda cptde var
-    //masin nomresinin unikalliqini temin etmek lazimdir..
 
 
 
