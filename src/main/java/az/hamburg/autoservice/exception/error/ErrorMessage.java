@@ -9,6 +9,9 @@ public class ErrorMessage {
     public static final String VEHICLE_NOT_FOUND = "Vehicle Not Found";
     public static final String APPOINTMENT_NOT_FOUND = "Appointment Not Found";
     public static final String APPOINTMENT_MECHANIC_NOT_FOUND = "Appointment Mechanic Not Found";
+    public static final String EMAIL_ALREADY_EXISTS = "Email Already Exists";
+    public static final String PLATE_NUMBER_ALREADY_EXISTS = "Plate Number Already Exists";
+    public static final String NUMBER_IS_WRONG = "Number is Wrong";
 
 
 }

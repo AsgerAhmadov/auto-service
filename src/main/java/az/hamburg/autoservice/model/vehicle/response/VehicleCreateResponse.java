@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class VehicleCreateResponse {
 
     private Long id;
+    private Long userId;
     private String brand;
     private String model;
     private String plateNumber;

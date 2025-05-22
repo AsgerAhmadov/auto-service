@@ -7,6 +7,7 @@ import az.hamburg.autoservice.model.user.response.UserCreateResponse;
 import az.hamburg.autoservice.model.user.response.UserReadResponse;
 import az.hamburg.autoservice.model.user.response.UserUpdateResponse;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE,
@@ -20,7 +21,7 @@ public interface UserMapper {
 
     UserReadResponse entityToReadResponse(User user);
 
-    User updateRequestToEntity(UserUpdateRequest updateRequest);
+    User updateRequestToEntity(@MappingTarget User user, UserUpdateRequest updateRequest);
 
     UserUpdateResponse entityToUpdateResponse(User user);
 

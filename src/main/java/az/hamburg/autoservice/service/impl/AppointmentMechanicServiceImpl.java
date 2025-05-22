@@ -1,8 +1,12 @@
 package az.hamburg.autoservice.service.impl;
 
+import az.hamburg.autoservice.domain.Appointment;
 import az.hamburg.autoservice.domain.AppointmentMechanic;
+import az.hamburg.autoservice.domain.Mechanic;
 import az.hamburg.autoservice.exception.error.ErrorMessage;
 import az.hamburg.autoservice.exception.handler.AppointmentMechanicNotFoundException;
+import az.hamburg.autoservice.exception.handler.AppointmentNotFoundException;
+import az.hamburg.autoservice.exception.handler.MechanicNotFoundException;
 import az.hamburg.autoservice.mappers.AppointmentMechanicMapper;
 import az.hamburg.autoservice.model.appointmentmechanic.request.AppointmentMechanicCreateRequest;
 import az.hamburg.autoservice.model.appointmentmechanic.request.AppointmentMechanicUpdateRequest;
@@ -10,6 +14,8 @@ import az.hamburg.autoservice.model.appointmentmechanic.response.AppointmentMech
 import az.hamburg.autoservice.model.appointmentmechanic.response.AppointmentMechanicReadResponse;
 import az.hamburg.autoservice.model.appointmentmechanic.response.AppointmentMechanicUpdateResponse;
 import az.hamburg.autoservice.repository.AppointmentMechanicRepository;
+import az.hamburg.autoservice.repository.AppointmentRepository;
+import az.hamburg.autoservice.repository.MechanicRepository;
 import az.hamburg.autoservice.service.AppointmentMechanicService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +31,22 @@ public class AppointmentMechanicServiceImpl implements AppointmentMechanicServic
 
     private final AppointmentMechanicRepository appointmentMechanicRepository;
     private final AppointmentMechanicMapper appointmentMechanicMapper;
+    private final AppointmentRepository appointmentRepository;
+    private final MechanicRepository mechanicRepository;
 
     @Override
     public AppointmentMechanicCreateResponse create(AppointmentMechanicCreateRequest createRequest) {
+
+        Appointment appointment = appointmentRepository.findById(createRequest.getAppointmentId())
+                .orElseThrow(()-> new AppointmentNotFoundException(ErrorMessage.APPOINTMENT_NOT_FOUND,HttpStatus.NOT_FOUND.name()));
+
+        Mechanic mechanic = mechanicRepository.findById(createRequest.getMechanicId())
+                .orElseThrow(()-> new MechanicNotFoundException(ErrorMessage.MECHANIC_NOT_FOUND,HttpStatus.NOT_FOUND.name()));
+
+
         AppointmentMechanic entity = appointmentMechanicMapper.createRequestToEntity(createRequest);
+        entity.setAppointmentId(appointment.getId());
+        entity.setMechanicId(mechanic.getId());
         appointmentMechanicRepository.save(entity);
         return appointmentMechanicMapper.entityToCreateResponse(entity);
     }

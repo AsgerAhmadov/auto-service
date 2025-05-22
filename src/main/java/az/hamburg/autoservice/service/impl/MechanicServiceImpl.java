@@ -4,6 +4,7 @@ import az.hamburg.autoservice.domain.Mechanic;
 import az.hamburg.autoservice.domain.RoleType;
 import az.hamburg.autoservice.domain.User;
 import az.hamburg.autoservice.exception.error.ErrorMessage;
+import az.hamburg.autoservice.exception.handler.EmailAlreadyExistsException;
 import az.hamburg.autoservice.exception.handler.MechanicNotFoundException;
 import az.hamburg.autoservice.exception.handler.UserNotFoundException;
 import az.hamburg.autoservice.mappers.MechanicMapper;
@@ -33,6 +34,13 @@ public class MechanicServiceImpl implements MechanicService {
     @Override
     public MechanicCreateResponse create(MechanicCreateRequest mechanicCreateRequest) {
 
+        List<String> allEmails = mechanicRepository.findAll()
+                .stream().map(Mechanic::getEmail)
+                .toList();
+        if (allEmails.contains(mechanicCreateRequest.getEmail())){
+            throw new EmailAlreadyExistsException(ErrorMessage.EMAIL_ALREADY_EXISTS, HttpStatus.BAD_REQUEST.name());
+        }
+
         Mechanic mechanic = mechanicMapper.createRequestToEntity(mechanicCreateRequest);
         mechanicRepository.save(mechanic);
         return mechanicMapper.entityToCreateResponse(mechanic);
@@ -42,11 +50,11 @@ public class MechanicServiceImpl implements MechanicService {
     @Override
     public MechanicUpdateResponse update(Long id, MechanicUpdateRequest updateRequest) {
 
-        Mechanic foundedMechanic = mechanicRepository
+        Mechanic entity = mechanicRepository
                 .findById(id).orElseThrow(() -> new MechanicNotFoundException(ErrorMessage.MECHANIC_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
-        Mechanic savedMechanic = mechanicMapper.updateRequestToEntity(updateRequest);
+        Mechanic savedMechanic = mechanicMapper.updateRequestToEntity(entity,updateRequest);
         mechanicRepository.save(savedMechanic);
-        return mechanicMapper.entityToUpdateResponse(foundedMechanic);
+        return mechanicMapper.entityToUpdateResponse(savedMechanic);
 
     }
 

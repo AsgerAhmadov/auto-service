@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface VehicleService {
 
-    VehicleCreateResponse create(VehicleCreateRequest createRequest);
+    VehicleCreateResponse create(Long userId ,VehicleCreateRequest createRequest);
 
     VehicleUpdateResponse update(Long id, VehicleUpdateRequest updateRequest);
 
