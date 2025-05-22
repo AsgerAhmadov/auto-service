@@ -3,6 +3,8 @@ package az.hamburg.autoservice.service.impl;
 import az.hamburg.autoservice.domain.User;
 import az.hamburg.autoservice.domain.Vehicle;
 import az.hamburg.autoservice.exception.error.ErrorMessage;
+import az.hamburg.autoservice.exception.handler.EmailAlreadyExistsException;
+import az.hamburg.autoservice.exception.handler.PlateNumberAlreadyExistsException;
 import az.hamburg.autoservice.exception.handler.UserNotFoundException;
 import az.hamburg.autoservice.exception.handler.VehicleNotFoundException;
 import az.hamburg.autoservice.mappers.VehicleMapper;
@@ -20,7 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +42,13 @@ public class VehicleServiceImpl implements VehicleService {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new  UserNotFoundException(ErrorMessage.USER_NOT_FOUND,HttpStatus.NOT_FOUND.name()));
 
+        List<String> allPlateNumbers = vehicleRepository.findAll()
+                .stream()
+                .map(Vehicle::getPlateNumber)
+                .collect(Collectors.toList());
+        if (allPlateNumbers.contains(createRequest.getPlateNumber())){
+            throw new PlateNumberAlreadyExistsException(ErrorMessage.PLATE_NUMBER_ALREADY_EXISTS, HttpStatus.BAD_REQUEST.name());
+        }
         Vehicle entity = vehicleMapper.createRequestToEntity(createRequest);
         entity.setUserId(user.getId());
         vehicleRepository.save(entity);

@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @Slf4j
 @RestControllerAdvice
@@ -55,6 +54,24 @@ public class CustomException {
     @ResponseStatus(NOT_FOUND)
     public ProblemDetail handlerAppointmentMechanicNotFound(AppointmentMechanicNotFoundException e){
         return ProblemDetail.forStatusAndDetail(NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    @ResponseStatus(CONFLICT)
+    public ProblemDetail handlerEmailAlreadyExists(EmailAlreadyExistsException e){
+        return ProblemDetail.forStatusAndDetail(CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(PlateNumberAlreadyExistsException.class)
+    @ResponseStatus(CONFLICT)
+    public ProblemDetail handlerPlateNumberAlreadyExists(PlateNumberAlreadyExistsException e){
+        return ProblemDetail.forStatusAndDetail(CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(WrongPhoneNumberException.class)
+    @ResponseStatus(BAD_REQUEST)
+    public ProblemDetail handlerWrongPhoneNumber(WrongPhoneNumberException e){
+        return ProblemDetail.forStatusAndDetail(BAD_REQUEST, e.getMessage());
     }
 
 }
