@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
         List<String> allEmails = userRepository.findAll()
                 .stream().map(User::getEmail)
-                .collect(Collectors.toList());
+                .toList();
         if (allEmails.contains(createRequest.getEmail())){
             throw new EmailAlreadyExistsException(ErrorMessage.EMAIL_ALREADY_EXISTS, HttpStatus.BAD_REQUEST.name());
         }

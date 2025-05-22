@@ -7,7 +7,6 @@ import az.hamburg.autoservice.exception.error.ErrorMessage;
 import az.hamburg.autoservice.exception.handler.AppointmentMechanicNotFoundException;
 import az.hamburg.autoservice.exception.handler.AppointmentNotFoundException;
 import az.hamburg.autoservice.exception.handler.MechanicNotFoundException;
-import az.hamburg.autoservice.mappers.AppointmentMapper;
 import az.hamburg.autoservice.mappers.AppointmentMechanicMapper;
 import az.hamburg.autoservice.model.appointmentmechanic.request.AppointmentMechanicCreateRequest;
 import az.hamburg.autoservice.model.appointmentmechanic.request.AppointmentMechanicUpdateRequest;
