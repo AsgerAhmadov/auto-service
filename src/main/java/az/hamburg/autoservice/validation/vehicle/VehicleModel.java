@@ -1,4 +1,4 @@
-package az.hamburg.autoservice.validation.user;
+package az.hamburg.autoservice.validation.vehicle;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -7,14 +7,14 @@ import jakarta.validation.constraints.Size;
 
 import java.lang.annotation.*;
 
-@Target({ElementType.FIELD, ElementType.TYPE})
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Constraint(validatedBy = {})
-@Size(min = 13, max = 13, message = "UserPhone Uzunlugu 13 olmalidi")
-@NotBlank(message = "UserPhone bos ola bilmez...")
-public @interface UserPhone {
-    String message() default "Invalid phone";
+@NotBlank(message = "VehicleModel boş ola bilməz.")
+@Size(max = 255, message = "VehicleModel maksimum 255 simvol ola bilər.")
+public @interface VehicleModel {
+    String message() default "Invalid model";
 
     Class<?>[] groups() default {};
 

@@ -5,14 +5,13 @@ import az.hamburg.autoservice.domain.User;
 import az.hamburg.autoservice.exception.error.ErrorMessage;
 import az.hamburg.autoservice.exception.handler.EmailAlreadyExistsException;
 import az.hamburg.autoservice.exception.handler.UserNotFoundException;
+import az.hamburg.autoservice.exception.handler.UserUnAuthorizedException;
 import az.hamburg.autoservice.exception.handler.WrongPhoneNumberException;
 import az.hamburg.autoservice.mappers.UserMapper;
 import az.hamburg.autoservice.model.user.request.UserCreateRequest;
 import az.hamburg.autoservice.model.user.request.UserLoginRequest;
 import az.hamburg.autoservice.model.user.request.UserUpdateRequest;
-import az.hamburg.autoservice.model.user.response.UserCreateResponse;
-import az.hamburg.autoservice.model.user.response.UserReadResponse;
-import az.hamburg.autoservice.model.user.response.UserUpdateResponse;
+import az.hamburg.autoservice.model.user.response.*;
 import az.hamburg.autoservice.repository.UserRepository;
 import az.hamburg.autoservice.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,7 @@ public class UserServiceImpl implements UserService {
         List<String> operatorBeginningsOfAzerbaijan = Arrays.asList("50", "51", "55", "99", "70", "77", "60");
         String checkOperatorNumber = phoneNumber.substring(4, 6);
         if (!checkNumber.equals("+994") || !operatorBeginningsOfAzerbaijan.contains(checkOperatorNumber)) {
-            throw new WrongPhoneNumberException(ErrorMessage.NUMBER_IS_WRONG, HttpStatus.BAD_REQUEST.name());
+            throw new WrongPhoneNumberException(ErrorMessage.WRONG_PHONE_NUMBER,HttpStatus.BAD_REQUEST.name());
         }
 
         List<String> allEmails = userRepository.findAll()
@@ -109,5 +108,47 @@ public class UserServiceImpl implements UserService {
         //todo:void qaytaracaq log.info atacam...
         //todo:encryption
     }
+
+    @Override
+    public UserRoleUpdateResponse roleUpdate(Long id, Long changerId, RoleType roleType) {
+
+        User foundedUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
+
+        User changerUser = userRepository.findById(changerId)
+                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
+
+        if (!changerUser.getRoleType().equals(RoleType.ADMIN)) {
+            throw new UserUnAuthorizedException(ErrorMessage.USER_UNAUTHORIZED, HttpStatus.UNAUTHORIZED.name());
+        }
+
+
+        foundedUser.setModifiedBy(changerUser.getUsername());
+        foundedUser.setRoleType(roleType);
+        userRepository.save(foundedUser);
+
+        return userMapper.entityToUserRoleUpdateResponse(foundedUser);
+
+    }
+
+    @Override
+    public UserStatusUpdateResponse statusUpdate(Long id, Long changerId, boolean status) {
+        User foundedUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
+
+        User changerUser = userRepository.findById(changerId)
+                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
+
+        if (!changerUser.getRoleType().equals(RoleType.MODERATOR)) {
+            throw new UserUnAuthorizedException(ErrorMessage.USER_UNAUTHORIZED, HttpStatus.UNAUTHORIZED.name());
+        }
+
+        foundedUser.setStatus(status);
+
+        foundedUser.setModifiedBy(changerUser.getUsername());
+
+        userRepository.save(foundedUser);
+
+        return userMapper.entityToUserStatusUpdateResponse(foundedUser);    }
 
 }
