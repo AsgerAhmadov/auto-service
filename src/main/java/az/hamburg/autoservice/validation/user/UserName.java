@@ -14,7 +14,7 @@ import java.lang.annotation.*;
 @NotBlank(message = "UserName boş ola bilməz.")
 @Size(max = 255, message = "UserName maksimum 255 simvol ola bilər.")
 public @interface UserName {
-    String message() default "";
+    String message() default "Invalid name";
 
     Class<?>[] groups() default {};
 

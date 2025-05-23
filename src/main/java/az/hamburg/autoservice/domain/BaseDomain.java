@@ -11,7 +11,9 @@ import java.time.LocalDateTime;
 public abstract class BaseDomain {
 
     private LocalDateTime created;
-    private LocalDateTime updated;
+    private String createdBy;
+    private LocalDateTime modified;
+    private String modifiedBy;
 
     @PrePersist
     protected void onCreate() {
@@ -23,6 +25,6 @@ public abstract class BaseDomain {
         if (this.created == null) {
             this.created = LocalDateTime.now();
         }
-        this.updated = LocalDateTime.now();
+        this.modified = LocalDateTime.now();
     }
 }

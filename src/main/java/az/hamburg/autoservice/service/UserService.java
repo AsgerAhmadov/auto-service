@@ -1,11 +1,10 @@
 package az.hamburg.autoservice.service;
 
+import az.hamburg.autoservice.domain.RoleType;
 import az.hamburg.autoservice.model.user.request.UserCreateRequest;
 import az.hamburg.autoservice.model.user.request.UserLoginRequest;
 import az.hamburg.autoservice.model.user.request.UserUpdateRequest;
-import az.hamburg.autoservice.model.user.response.UserCreateResponse;
-import az.hamburg.autoservice.model.user.response.UserReadResponse;
-import az.hamburg.autoservice.model.user.response.UserUpdateResponse;
+import az.hamburg.autoservice.model.user.response.*;
 
 import java.util.List;
 
@@ -22,5 +21,9 @@ public interface UserService {
     void delete (Long id);
 
      String loginUser(UserLoginRequest request);
+
+    UserRoleUpdateResponse roleUpdate(Long id, Long changerId, RoleType roleType);
+
+    UserStatusUpdateResponse statusUpdate(Long id, Long changerId, boolean status);
 
 }
