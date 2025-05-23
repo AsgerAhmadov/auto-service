@@ -1,10 +1,12 @@
 package az.hamburg.autoservice.controller;
 
 
+import az.hamburg.autoservice.domain.Appointment;
 import az.hamburg.autoservice.model.appointment.request.AppointmentCreateRequest;
 import az.hamburg.autoservice.model.appointment.request.AppointmentUpdateRequest;
 import az.hamburg.autoservice.model.appointment.response.AppointmentCreateResponse;
 import az.hamburg.autoservice.model.appointment.response.AppointmentReadResponse;
+import az.hamburg.autoservice.model.appointment.response.AppointmentStatusUpdateResponse;
 import az.hamburg.autoservice.model.appointment.response.AppointmentUpdateResponse;
 import az.hamburg.autoservice.service.AppointmentService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -52,5 +54,11 @@ public class AppointmentController {
     public void delete(@PathVariable Long id ) {
         appointmentService.delete(id);
     }
+
+//    @PutMapping("/{id}/status-update/{changerId}")
+//    @ResponseStatus(HttpStatus.OK)
+//    public AppointmentStatusUpdateResponse updateStatus(@PathVariable Long id, @PathVariable Long changerId, @RequestParam boolean status) {
+//        return appointmentService.statusUpdate(id, changerId, status);
+//    }
 
 }

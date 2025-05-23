@@ -1,18 +1,20 @@
 package az.hamburg.autoservice.service.impl;
 
-import az.hamburg.autoservice.domain.Appointment;
-import az.hamburg.autoservice.domain.RequestStatus;
-import az.hamburg.autoservice.domain.Vehicle;
+import az.hamburg.autoservice.domain.*;
 import az.hamburg.autoservice.exception.error.ErrorMessage;
 import az.hamburg.autoservice.exception.handler.AppointmentNotFoundException;
+import az.hamburg.autoservice.exception.handler.UserNotFoundException;
+import az.hamburg.autoservice.exception.handler.UserUnAuthorizedException;
 import az.hamburg.autoservice.exception.handler.VehicleNotFoundException;
 import az.hamburg.autoservice.mappers.AppointmentMapper;
 import az.hamburg.autoservice.model.appointment.request.AppointmentCreateRequest;
 import az.hamburg.autoservice.model.appointment.request.AppointmentUpdateRequest;
 import az.hamburg.autoservice.model.appointment.response.AppointmentCreateResponse;
 import az.hamburg.autoservice.model.appointment.response.AppointmentReadResponse;
+import az.hamburg.autoservice.model.appointment.response.AppointmentStatusUpdateResponse;
 import az.hamburg.autoservice.model.appointment.response.AppointmentUpdateResponse;
 import az.hamburg.autoservice.repository.AppointmentRepository;
+import az.hamburg.autoservice.repository.UserRepository;
 import az.hamburg.autoservice.repository.VehicleRepository;
 import az.hamburg.autoservice.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
     private final VehicleRepository vehicleRepository;
+    private final UserRepository userRepository;
 
     @Override
     public AppointmentCreateResponse create(Long vehicleId,AppointmentCreateRequest createRequest) {
@@ -74,4 +77,24 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new AppointmentNotFoundException(ErrorMessage.APPOINTMENT_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
         appointmentRepository.deleteById(entity.getId());
     }
+
+//    @Override
+//    public AppointmentStatusUpdateResponse statusUpdate(Long appointmentId, Long userId, boolean statusChange) {
+//        Appointment foundedAppointment = appointmentRepository.findById(appointmentId)
+//                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
+//
+//        User changerUser = userRepository.findById(userId)
+//                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
+//
+//        if (!changerUser.getRoleType().equals(RoleType.MODERATOR)) {
+//            throw new UserUnAuthorizedException(ErrorMessage.USER_UNAUTHORIZED, HttpStatus.UNAUTHORIZED.name());
+//        }
+//
+//        foundedAppointment.setStatus(statusChange);
+//
+//
+//        appointmentRepository.save(foundedAppointment);
+//
+//        return appointmentMapper.entityToAppointmentStatusUpdateResponse(foundedAppointment);
+//    }
 }

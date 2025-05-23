@@ -17,6 +17,7 @@ import az.hamburg.autoservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserCreateResponse create(UserCreateRequest createRequest) {
@@ -50,6 +52,11 @@ public class UserServiceImpl implements UserService {
         }
         User user = userMapper.createRequestToEntity(createRequest);
         user.setRoleType(RoleType.USER);
+
+        String encodedPassword = passwordEncoder.encode(createRequest.getPassword());
+        user.setPassword(encodedPassword);
+
+
         userRepository.save(user);
         return userMapper.entityToCreateResponse(user);
 
@@ -97,17 +104,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public String loginUser(UserLoginRequest request) {
 
-        User foundUser = userRepository.findByUsernameAndPassword(request.getUsername(), request.getPassword())
+        User foundUser = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
 
-        if (foundUser != null) {
+        if (passwordEncoder.matches(request.getPassword(), foundUser.getPassword())) {
             return "login successful";
-        }
-        return "login failed";
 
-        //todo:void qaytaracaq log.info atacam...
-        //todo:encryption
+        } else {
+            return "Password is incorrect";
+        }
     }
+
+    //todo:void qaytaracaq log.info atacam...
+    //todo:encryption
 
     @Override
     public UserRoleUpdateResponse roleUpdate(Long id, Long changerId, RoleType roleType) {
@@ -123,7 +132,6 @@ public class UserServiceImpl implements UserService {
         }
 
 
-        foundedUser.setModifiedBy(changerUser.getUsername());
         foundedUser.setRoleType(roleType);
         userRepository.save(foundedUser);
 
@@ -131,24 +139,5 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Override
-    public UserStatusUpdateResponse statusUpdate(Long id, Long changerId, boolean status) {
-        User foundedUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
-
-        User changerUser = userRepository.findById(changerId)
-                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
-
-        if (!changerUser.getRoleType().equals(RoleType.MODERATOR)) {
-            throw new UserUnAuthorizedException(ErrorMessage.USER_UNAUTHORIZED, HttpStatus.UNAUTHORIZED.name());
-        }
-
-        foundedUser.setStatus(status);
-
-        foundedUser.setModifiedBy(changerUser.getUsername());
-
-        userRepository.save(foundedUser);
-
-        return userMapper.entityToUserStatusUpdateResponse(foundedUser);    }
 
 }

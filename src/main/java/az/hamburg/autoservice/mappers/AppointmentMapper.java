@@ -5,6 +5,7 @@ import az.hamburg.autoservice.model.appointment.request.AppointmentCreateRequest
 import az.hamburg.autoservice.model.appointment.request.AppointmentUpdateRequest;
 import az.hamburg.autoservice.model.appointment.response.AppointmentCreateResponse;
 import az.hamburg.autoservice.model.appointment.response.AppointmentReadResponse;
+import az.hamburg.autoservice.model.appointment.response.AppointmentStatusUpdateResponse;
 import az.hamburg.autoservice.model.appointment.response.AppointmentUpdateResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -23,4 +24,6 @@ public interface AppointmentMapper {
     Appointment updateRequestToEntity(@MappingTarget Appointment appointment , AppointmentUpdateRequest updateRequest);
 
     AppointmentUpdateResponse entityToUpdateResponse(Appointment appointment);
+
+//    AppointmentStatusUpdateResponse entityToAppointmentStatusUpdateResponse(Appointment appointment);
 }
