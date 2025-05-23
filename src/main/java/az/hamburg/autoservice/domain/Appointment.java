@@ -22,12 +22,9 @@ public class Appointment extends BaseDomain{
     private Long vehicleId;
     private LocalDateTime date;
     private String serviceDescription;
+//    private Boolean statusChange;
     private boolean  isProcessed;//process tamamlanibsa databazadan silmek yeni, usta isini bitiribse
     //gorusu bitirmek
-
-    //bide serurity meselesi oda cptde var
-
-
 
     @Enumerated(EnumType.STRING)
     private RequestStatus status;

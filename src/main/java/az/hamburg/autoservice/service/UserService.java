@@ -24,6 +24,4 @@ public interface UserService {
 
     UserRoleUpdateResponse roleUpdate(Long id, Long changerId, RoleType roleType);
 
-    UserStatusUpdateResponse statusUpdate(Long id, Long changerId, boolean status);
-
 }

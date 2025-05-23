@@ -65,10 +65,5 @@ public class UserController {
         return userService.roleUpdate(id, changerId, roleType);
     }
 
-    @PutMapping("/{id}/status-update/{changerId}")
-    @ResponseStatus(HttpStatus.OK)
-    public UserStatusUpdateResponse updateStatus(@PathVariable Long id, @PathVariable Long changerId, @RequestParam boolean status) {
-        return userService.statusUpdate(id, changerId, status);
-    }
 
 }
