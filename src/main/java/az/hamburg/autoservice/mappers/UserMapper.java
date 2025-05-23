@@ -25,6 +25,4 @@ public interface UserMapper {
 
     UserRoleUpdateResponse entityToUserRoleUpdateResponse(User user);
 
-    UserStatusUpdateResponse entityToUserStatusUpdateResponse(User user);
-
 }

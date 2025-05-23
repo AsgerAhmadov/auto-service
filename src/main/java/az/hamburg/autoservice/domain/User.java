@@ -22,7 +22,6 @@ public class User extends BaseDomain{
     private String name;
     private String phone;
     private String email;
-    private boolean status;
 
     @Enumerated(EnumType.STRING)
     private RoleType roleType;
