@@ -78,6 +78,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.deleteById(entity.getId());
     }
 
+    @Override
+    public List<AppointmentReadResponse> getAllStatusPending() {
+        return appointmentRepository.getAllAppointmentByStatus(RequestStatus.PENDING)
+                .stream()
+                .map(appointmentMapper::entityToReadResponse)
+                .toList();
+    }
+
 //    @Override
 //    public AppointmentStatusUpdateResponse statusUpdate(Long appointmentId, Long userId, boolean statusChange) {
 //        Appointment foundedAppointment = appointmentRepository.findById(appointmentId)
@@ -97,4 +105,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 //
 //        return appointmentMapper.entityToAppointmentStatusUpdateResponse(foundedAppointment);
 //    }
+
+
+
+
+
 }
