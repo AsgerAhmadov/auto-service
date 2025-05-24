@@ -61,4 +61,10 @@ public class AppointmentController {
 //        return appointmentService.statusUpdate(id, changerId, status);
 //    }
 
+    @GetMapping("/status-pending")
+    @ResponseStatus(HttpStatus.OK)
+    public List<AppointmentReadResponse> getPendingStatus() {
+        return appointmentService.getAllStatusPending();
+    }
+
 }

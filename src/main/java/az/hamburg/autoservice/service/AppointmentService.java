@@ -21,4 +21,6 @@ public interface AppointmentService {
 
     void  delete(Long id);
 //    public AppointmentStatusUpdateResponse statusUpdate(Long appointmentId, Long userId, boolean status);
+
+    List<AppointmentReadResponse> getAllStatusPending();
 }
