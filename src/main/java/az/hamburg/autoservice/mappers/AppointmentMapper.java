@@ -25,5 +25,4 @@ public interface AppointmentMapper {
 
     AppointmentUpdateResponse entityToUpdateResponse(Appointment appointment);
 
-//    AppointmentStatusUpdateResponse entityToAppointmentStatusUpdateResponse(Appointment appointment);
 }
