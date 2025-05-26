@@ -1,9 +1,11 @@
 package az.hamburg.autoservice.exception;
 
+import az.hamburg.autoservice.exception.error.ErrorResponse;
 import az.hamburg.autoservice.exception.handler.*;
 import ch.qos.logback.core.model.processor.ModelHandlerException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -72,6 +74,22 @@ public class CustomException {
     @ResponseStatus(BAD_REQUEST)
     public ProblemDetail handlerWrongPhoneNumber(WrongPhoneNumberException e){
         return ProblemDetail.forStatusAndDetail(BAD_REQUEST, e.getMessage());
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(BAD_REQUEST)
+    public ErrorResponse handlerMethodArgumentNotValid(MethodArgumentNotValidException exception) {
+        String fieldName = exception.getBindingResult().getFieldError().getField();
+        String message = exception.getBindingResult().getFieldError().getDefaultMessage();
+
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setCode(BAD_REQUEST.name());
+        errorResponse.setMessage(fieldName + message);
+
+        return ErrorResponse.builder()
+                .message(fieldName + message)
+                .code(BAD_REQUEST.name())
+                .build();
+
     }
 
 }

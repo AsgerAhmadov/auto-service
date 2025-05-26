@@ -13,5 +13,5 @@ import java.time.LocalDateTime;
 public class UserRoleUpdateResponse {
     private Long id;
     private RoleType roleType;
-    private LocalDateTime modified;
+    private LocalDateTime updated;
 }

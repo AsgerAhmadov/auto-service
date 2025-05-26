@@ -20,7 +20,8 @@ public interface AppointmentService {
     List<AppointmentReadResponse> getAll();
 
     void  delete(Long id);
-//    public AppointmentStatusUpdateResponse statusUpdate(Long appointmentId, Long userId, boolean status);
+
+     AppointmentStatusUpdateResponse statusUpdate( Long userId,Long appointmentId, boolean status);
 
     List<AppointmentReadResponse> getAllStatusPending();
 }

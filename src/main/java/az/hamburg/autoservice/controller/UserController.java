@@ -59,10 +59,10 @@ public class UserController {
         return userService.loginUser(loginRequest);
     }
 
-    @PutMapping("/{id}/role-update/{changerId}")
+    @PutMapping("/{changerId}/role-update/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserRoleUpdateResponse updateRole(@PathVariable Long id, @PathVariable Long changerId, @RequestParam RoleType roleType) {
-        return userService.roleUpdate(id, changerId, roleType);
+    public UserRoleUpdateResponse updateRole( @PathVariable Long changerId,@PathVariable Long id, @RequestParam RoleType roleType) {
+        return userService.roleUpdate(changerId, id, roleType);
     }
 
 

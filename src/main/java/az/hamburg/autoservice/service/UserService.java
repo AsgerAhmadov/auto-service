@@ -22,6 +22,6 @@ public interface UserService {
 
      String loginUser(UserLoginRequest request);
 
-    UserRoleUpdateResponse roleUpdate(Long id, Long changerId, RoleType roleType);
+    UserRoleUpdateResponse roleUpdate( Long changerId, Long id, RoleType roleType);
 
 }

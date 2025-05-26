@@ -11,6 +11,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AppointmentStatusUpdateResponse {
     private Long id;
-    private boolean status;
+    private boolean statusChange;
     private LocalDateTime modified;
 }
