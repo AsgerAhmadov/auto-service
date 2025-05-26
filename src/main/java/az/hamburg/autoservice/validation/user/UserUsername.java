@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Documented
 @Constraint(validatedBy = {})
 @NotBlank(message = "UserUsername boş ola bilməz.")
-@Size(max = 255, message = "UserUsername maksimum 255 simvol ola bilər.")
+@Size(max = 50, message = "UserUsername maksimum 50 simvol ola bilər.")
 public @interface UserUsername {
     String message() default "Invalid username";
 
