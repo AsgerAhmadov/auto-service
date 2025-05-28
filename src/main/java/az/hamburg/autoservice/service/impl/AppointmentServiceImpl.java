@@ -2,10 +2,7 @@ package az.hamburg.autoservice.service.impl;
 
 import az.hamburg.autoservice.domain.*;
 import az.hamburg.autoservice.exception.error.ErrorMessage;
-import az.hamburg.autoservice.exception.handler.AppointmentNotFoundException;
-import az.hamburg.autoservice.exception.handler.UserNotFoundException;
-import az.hamburg.autoservice.exception.handler.UserUnAuthorizedException;
-import az.hamburg.autoservice.exception.handler.VehicleNotFoundException;
+import az.hamburg.autoservice.exception.handler.*;
 import az.hamburg.autoservice.mappers.AppointmentMapper;
 import az.hamburg.autoservice.model.appointment.request.AppointmentCreateRequest;
 import az.hamburg.autoservice.model.appointment.request.AppointmentUpdateRequest;
@@ -86,28 +83,44 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .toList();
     }
 
-//    @Override
-//    public AppointmentStatusUpdateResponse statusUpdate(Long appointmentId, Long userId, boolean statusChange) {
-//        Appointment foundedAppointment = appointmentRepository.findById(appointmentId)
-//                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
-//
-//        User changerUser = userRepository.findById(userId)
-//                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
-//
-//        if (!changerUser.getRoleType().equals(RoleType.MODERATOR)) {
-//            throw new UserUnAuthorizedException(ErrorMessage.USER_UNAUTHORIZED, HttpStatus.UNAUTHORIZED.name());
-//        }
-//
-//        foundedAppointment.setStatus(statusChange);
-//
-//
-//        appointmentRepository.save(foundedAppointment);
-//
-//        return appointmentMapper.entityToAppointmentStatusUpdateResponse(foundedAppointment);
-//    }
+    @Override
+    public AppointmentStatusUpdateResponse statusUpdate( Long userId, Long appointmentId, RequestStatus status) {
+
+        User changerUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
+
+        Appointment foundedAppointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new AppointmentNotFoundException(ErrorMessage.APPOINTMENT_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
 
 
+        if (!changerUser.getRoleType().equals(RoleType.MODERATOR)) {
+            throw new UserUnAuthorizedException(ErrorMessage.USER_UNAUTHORIZED, HttpStatus.UNAUTHORIZED.name());
+        }
+
+        foundedAppointment.setStatus(status);
 
 
+        appointmentRepository.save(foundedAppointment);
+
+        return appointmentMapper.entityToAppointmentStatusUpdateResponse(foundedAppointment);
+    }
+
+
+    @Override
+    public void deleteCompleted(Long appointmentId) {
+
+        Appointment appointment =  appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new AppointmentNotFoundException(ErrorMessage.APPOINTMENT_NOT_FOUND,HttpStatus.NOT_FOUND.name()));
+
+        if (!appointment.getStatus().equals(RequestStatus.COMPLETED)){
+            throw  new AppointmentNotCompleted(ErrorMessage.APPOINTMENT_NOT_COMPLETED,HttpStatus.BAD_REQUEST.name());
+        }
+        appointmentRepository.deleteById(appointment.getId());
+
+
+    }
 
 }
+
+//process tamamlanibsa databazadan silmek yeni, usta isini bitiribse
+//gorusu bitirmek

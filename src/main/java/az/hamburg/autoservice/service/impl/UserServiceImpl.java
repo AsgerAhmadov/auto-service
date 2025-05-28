@@ -115,11 +115,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    //todo:void qaytaracaq log.info atacam...
-    //todo:encryption
 
     @Override
-    public UserRoleUpdateResponse roleUpdate(Long id, Long changerId, RoleType roleType) {
+    public UserRoleUpdateResponse roleUpdate( Long changerId, Long id, RoleType roleType) {
 
         User foundedUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
@@ -130,7 +128,6 @@ public class UserServiceImpl implements UserService {
         if (!changerUser.getRoleType().equals(RoleType.ADMIN)) {
             throw new UserUnAuthorizedException(ErrorMessage.USER_UNAUTHORIZED, HttpStatus.UNAUTHORIZED.name());
         }
-
 
         foundedUser.setRoleType(roleType);
         userRepository.save(foundedUser);

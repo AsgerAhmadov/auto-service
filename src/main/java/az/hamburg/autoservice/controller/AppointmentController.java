@@ -1,7 +1,7 @@
 package az.hamburg.autoservice.controller;
 
 
-import az.hamburg.autoservice.domain.Appointment;
+import az.hamburg.autoservice.domain.RequestStatus;
 import az.hamburg.autoservice.model.appointment.request.AppointmentCreateRequest;
 import az.hamburg.autoservice.model.appointment.request.AppointmentUpdateRequest;
 import az.hamburg.autoservice.model.appointment.response.AppointmentCreateResponse;
@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @RestController
 @RequestMapping("api/appointments")
@@ -55,16 +57,22 @@ public class AppointmentController {
         appointmentService.delete(id);
     }
 
-//    @PutMapping("/{id}/status-update/{changerId}")
-//    @ResponseStatus(HttpStatus.OK)
-//    public AppointmentStatusUpdateResponse updateStatus(@PathVariable Long id, @PathVariable Long changerId, @RequestParam boolean status) {
-//        return appointmentService.statusUpdate(id, changerId, status);
-//    }
+    @PutMapping("/{userId}/status-update/{appointmentId}")
+    @ResponseStatus(HttpStatus.OK)
+    public AppointmentStatusUpdateResponse updateStatus(@PathVariable Long userId,@PathVariable Long appointmentId, @RequestParam RequestStatus status) {
+        return appointmentService.statusUpdate(userId, appointmentId, status);
+    }
 
     @GetMapping("/status-pending")
     @ResponseStatus(HttpStatus.OK)
     public List<AppointmentReadResponse> getPendingStatus() {
         return appointmentService.getAllStatusPending();
+    }
+
+    @DeleteMapping("delete-completed/{appointmentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCompleted(@PathVariable Long appointmentId) {
+        appointmentService.deleteCompleted(appointmentId);
     }
 
 }

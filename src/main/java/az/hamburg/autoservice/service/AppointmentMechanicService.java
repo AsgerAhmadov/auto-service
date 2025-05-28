@@ -21,4 +21,5 @@ public interface AppointmentMechanicService {
     List<AppointmentMechanicReadResponse> getAll();
 
     void  delete(Long id);
+
 }
