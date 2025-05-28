@@ -1,6 +1,7 @@
 package az.hamburg.autoservice.controller;
 
 
+import az.hamburg.autoservice.domain.RequestStatus;
 import az.hamburg.autoservice.model.appointment.request.AppointmentCreateRequest;
 import az.hamburg.autoservice.model.appointment.request.AppointmentUpdateRequest;
 import az.hamburg.autoservice.model.appointment.response.AppointmentCreateResponse;
@@ -58,7 +59,7 @@ public class AppointmentController {
 
     @PutMapping("/{userId}/status-update/{appointmentId}")
     @ResponseStatus(HttpStatus.OK)
-    public AppointmentStatusUpdateResponse updateStatus(@PathVariable Long userId,@PathVariable Long appointmentId, @RequestParam boolean status) {
+    public AppointmentStatusUpdateResponse updateStatus(@PathVariable Long userId,@PathVariable Long appointmentId, @RequestParam RequestStatus status) {
         return appointmentService.statusUpdate(userId, appointmentId, status);
     }
 
@@ -66,6 +67,12 @@ public class AppointmentController {
     @ResponseStatus(HttpStatus.OK)
     public List<AppointmentReadResponse> getPendingStatus() {
         return appointmentService.getAllStatusPending();
+    }
+
+    @DeleteMapping("delete-completed/{appointmentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCompleted(@PathVariable Long appointmentId) {
+        appointmentService.deleteCompleted(appointmentId);
     }
 
 }
