@@ -81,4 +81,5 @@ public class AppointmentMechanicServiceImpl implements AppointmentMechanicServic
                 .orElseThrow(() -> new AppointmentMechanicNotFoundException(ErrorMessage.APPOINTMENT_MECHANIC_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
         appointmentMechanicRepository.deleteById(entity.getId());
     }
+
 }

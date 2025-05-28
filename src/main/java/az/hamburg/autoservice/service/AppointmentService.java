@@ -1,5 +1,6 @@
 package az.hamburg.autoservice.service;
 
+import az.hamburg.autoservice.domain.RequestStatus;
 import az.hamburg.autoservice.model.appointment.request.AppointmentCreateRequest;
 import az.hamburg.autoservice.model.appointment.request.AppointmentUpdateRequest;
 import az.hamburg.autoservice.model.appointment.response.AppointmentCreateResponse;
@@ -21,7 +22,10 @@ public interface AppointmentService {
 
     void  delete(Long id);
 
-     AppointmentStatusUpdateResponse statusUpdate( Long userId,Long appointmentId, boolean status);
+     AppointmentStatusUpdateResponse statusUpdate( Long userId,Long appointmentId, RequestStatus status);
 
     List<AppointmentReadResponse> getAllStatusPending();
+
+    void deleteCompleted(Long appointmentId);
+
 }
