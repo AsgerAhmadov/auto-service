@@ -20,6 +20,6 @@ public class UserReadResponse {
     private String email;
     private RoleType roleType;
     private LocalDateTime created;
-    private LocalDateTime updated;
+    private LocalDateTime modified;
 
 }

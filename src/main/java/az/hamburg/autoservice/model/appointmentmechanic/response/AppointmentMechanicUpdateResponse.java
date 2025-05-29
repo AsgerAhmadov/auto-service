@@ -14,6 +14,6 @@ public class AppointmentMechanicUpdateResponse {
     private Long id;
     private Long appointmentId;
     private Long mechanicId;
-    private LocalDateTime assignedAt;
-    private LocalDateTime updated;
+    private String assignedAt;
+    private LocalDateTime modified;
 }

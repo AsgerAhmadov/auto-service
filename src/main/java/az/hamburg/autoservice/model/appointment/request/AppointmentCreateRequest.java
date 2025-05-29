@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AppointmentCreateRequest {
 
-    private LocalDateTime date;
+    private String date;
 
     @AppointmentServiceDescription
     private String serviceDescription;
