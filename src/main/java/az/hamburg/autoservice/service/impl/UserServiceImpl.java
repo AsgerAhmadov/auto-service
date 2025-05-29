@@ -88,6 +88,13 @@ public class UserServiceImpl implements UserService {
         User entity = userRepository
                 .findById(id).orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
         User savedUser = userMapper.updateRequestToEntity(entity,updateRequest);
+
+        savedUser.setEmail(updateRequest.getEmail());
+        savedUser.setName(updateRequest.getName());
+        savedUser.setPassword(updateRequest.getPassword());
+        savedUser.setPhone(updateRequest.getPhone());
+        savedUser.setUsername(updateRequest.getUsername());
+
         userRepository.save(savedUser);
 
         return userMapper.entityToUpdateResponse(savedUser);
@@ -98,7 +105,13 @@ public class UserServiceImpl implements UserService {
     public void delete(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
+
+        if (!user.getRoleType().equals(RoleType.ADMIN)) {
+            throw new UserUnAuthorizedException(ErrorMessage.USER_UNAUTHORIZED, HttpStatus.UNAUTHORIZED.name());
+        }
         userRepository.deleteById(user.getId());
+
+
     }
 
     @Override

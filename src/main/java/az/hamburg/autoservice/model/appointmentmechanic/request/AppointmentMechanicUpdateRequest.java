@@ -13,5 +13,5 @@ public class AppointmentMechanicUpdateRequest {
 
     private Long appointmentId;
     private Long mechanicId;
-    private LocalDateTime assignedAt;
+    private String assignedAt;
 }

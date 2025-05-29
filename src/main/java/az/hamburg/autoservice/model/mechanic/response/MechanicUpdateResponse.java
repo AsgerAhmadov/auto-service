@@ -15,5 +15,5 @@ public class MechanicUpdateResponse {
     private String name;
     private String email;
     private String specialty;
-    private LocalDateTime updated;
+    private LocalDateTime modified;
 }

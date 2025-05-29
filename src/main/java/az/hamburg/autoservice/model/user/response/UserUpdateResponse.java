@@ -17,6 +17,6 @@ public class UserUpdateResponse {
     private String name;
     private String phone;
     private String email;
-    private LocalDateTime updated;
+    private LocalDateTime modified;
 
 }

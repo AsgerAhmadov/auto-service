@@ -112,26 +112,34 @@ class UserServiceImplTest {
 
     @Test
     void testDelete_Success() {
-        User user = new User();
-        user.setId(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        Long userId = 1L;
 
-        userService.delete(1L);
+        User adminUser = new User();
+        adminUser.setId(userId);
+        adminUser.setRoleType(RoleType.ADMIN);
 
-        verify(userRepository).deleteById(1L);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(adminUser));
+
+        userService.delete(userId);
+
+        verify(userRepository, times(1)).deleteById(userId);
     }
-
     @Test
     void testLoginUser_Success() {
-        UserLoginRequest request = new UserLoginRequest();
-        request.setUsername("testUser");
-        request.setPassword("password");
+        String username = "testuser";
+        String rawPassword = "password";
+        String encodedPassword = "$2a$10$encodedpassword";
 
         User user = new User();
-        user.setPassword("encodedPassword");
+        user.setUsername(username);
+        user.setPassword(encodedPassword);
 
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("password", "encodedPassword")).thenReturn(true);
+        UserLoginRequest request = new UserLoginRequest();
+        request.setUsername(username);
+        request.setPassword(rawPassword);
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
 
         String result = userService.loginUser(request);
 
@@ -139,23 +147,32 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testRoleUpdate_AsAdmin_Success() {
-        User userToUpdate = new User();
-        userToUpdate.setId(1L);
-        User adminUser = new User();
-        adminUser.setId(2L);
-        adminUser.setRoleType(RoleType.ADMIN);
+    void testRoleUpdate_Success() {
+        Long changerId = 1L;
+        Long targetId = 2L;
+        RoleType newRole = RoleType.MODERATOR;
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(userToUpdate));
-        when(userRepository.findById(2L)).thenReturn(Optional.of(adminUser));
-        when(userRepository.save(userToUpdate)).thenReturn(userToUpdate);
+        User changerUser = new User();
+        changerUser.setId(changerId);
+        changerUser.setRoleType(RoleType.ADMIN);
+
+        User targetUser = new User();
+        targetUser.setId(targetId);
+        targetUser.setRoleType(RoleType.USER);
+
         UserRoleUpdateResponse expectedResponse = new UserRoleUpdateResponse();
-        when(userMapper.entityToUserRoleUpdateResponse(userToUpdate)).thenReturn(expectedResponse);
 
-        UserRoleUpdateResponse response = userService.roleUpdate(1L, 2L, RoleType.MODERATOR);
+        when(userRepository.findById(changerId)).thenReturn(Optional.of(changerUser));
+        when(userRepository.findById(targetId)).thenReturn(Optional.of(targetUser));
+        when(userRepository.save(any(User.class))).thenReturn(targetUser);
+        when(userMapper.entityToUserRoleUpdateResponse(targetUser)).thenReturn(expectedResponse);
+
+        UserRoleUpdateResponse response = userService.roleUpdate(changerId, targetId, newRole);
 
         assertNotNull(response);
-        verify(userRepository).save(userToUpdate);
+        assertEquals(expectedResponse, response);
+
+        verify(userRepository, times(1)).save(targetUser);
     }
 }
 
