@@ -53,11 +53,18 @@ public class AppointmentMechanicServiceImpl implements AppointmentMechanicServic
 
     @Override
     public AppointmentMechanicUpdateResponse update(Long id , AppointmentMechanicUpdateRequest updateRequest) {
+
+
         AppointmentMechanic entity = appointmentMechanicRepository.findById(id)
                 .orElseThrow(() -> new AppointmentMechanicNotFoundException(ErrorMessage.APPOINTMENT_MECHANIC_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
-        AppointmentMechanic update = appointmentMechanicMapper.updateRequestToEntity(entity, updateRequest);
-        appointmentMechanicRepository.save(update);
-        return appointmentMechanicMapper.entityToUpdateResponse(update);
+        AppointmentMechanic appointmentMechanic = appointmentMechanicMapper.updateRequestToEntity(entity, updateRequest);
+
+        appointmentMechanic.setAppointmentId(updateRequest.getAppointmentId());
+        appointmentMechanic.setMechanicId(updateRequest.getMechanicId());
+        appointmentMechanic.setAssignedAt(updateRequest.getAssignedAt());
+
+        appointmentMechanicRepository.save(appointmentMechanic);
+        return appointmentMechanicMapper.entityToUpdateResponse(appointmentMechanic);
     }
 
     @Override

@@ -14,9 +14,9 @@ public class AppointmentReadResponse {
 
     private Long id;
     private Long vehicleId;
-    private LocalDateTime date;
+    private String date;
     private String serviceDescription;
     private RequestStatus status;
     private LocalDateTime created;
-    private LocalDateTime updated;
+    private LocalDateTime modified;
 }

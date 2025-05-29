@@ -20,7 +20,7 @@ public class Appointment extends BaseDomain{
     private Long id;
 
     private Long vehicleId;
-    private LocalDateTime date;
+    private String date;
     private String serviceDescription;
 
 

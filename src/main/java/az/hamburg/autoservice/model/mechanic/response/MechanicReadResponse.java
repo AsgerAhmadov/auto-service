@@ -16,5 +16,5 @@ public class MechanicReadResponse {
     private String email;
     private String specialty;
     private LocalDateTime created;
-    private LocalDateTime updated;
+    private LocalDateTime modified;
 }

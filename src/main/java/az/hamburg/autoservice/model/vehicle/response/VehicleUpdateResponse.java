@@ -15,5 +15,5 @@ public class VehicleUpdateResponse {
     private String brand;
     private String model;
     private String plateNumber;
-    private LocalDateTime updated;
+    private LocalDateTime modified;
 }

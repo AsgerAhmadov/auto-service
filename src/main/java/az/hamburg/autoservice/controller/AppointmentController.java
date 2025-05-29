@@ -51,10 +51,10 @@ public class AppointmentController {
         return appointmentService.update(id, updateRequest);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("{userId}/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id ) {
-        appointmentService.delete(id);
+    public void delete(@PathVariable Long userId ,@PathVariable Long id ) {
+        appointmentService.delete(userId,id);
     }
 
     @PutMapping("/{userId}/status-update/{appointmentId}")

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AppointmentUpdateRequest {
 
-    private LocalDateTime date;
+    private String date;
     private String serviceDescription;
 
 }

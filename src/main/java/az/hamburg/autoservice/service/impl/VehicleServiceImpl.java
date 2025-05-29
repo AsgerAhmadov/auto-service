@@ -60,6 +60,11 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle entity = vehicleRepository.findById(id)
                 .orElseThrow(() -> new VehicleNotFoundException(ErrorMessage.VEHICLE_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
         Vehicle update = vehicleMapper.updateRequestToEntity(entity, updateRequest);
+
+        update.setBrand(updateRequest.getBrand());
+        update.setModel(updateRequest.getModel());
+        update.setPlateNumber(updateRequest.getPlateNumber());
+
         vehicleRepository.save(update);
         return vehicleMapper.entityToUpdateResponse(update);
     }

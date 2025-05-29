@@ -18,5 +18,5 @@ public class VehicleReadResponse {
     private String model;
     private String plateNumber;
     private LocalDateTime created;
-    private LocalDateTime updated;
+    private LocalDateTime modified;
 }

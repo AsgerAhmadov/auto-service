@@ -32,10 +32,10 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository;
 
     @Override
-    public AppointmentCreateResponse create(Long vehicleId,AppointmentCreateRequest createRequest) {
+    public AppointmentCreateResponse create(Long vehicleId, AppointmentCreateRequest createRequest) {
 
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
-                .orElseThrow(()-> new VehicleNotFoundException(ErrorMessage.VEHICLE_NOT_FOUND,HttpStatus.NOT_FOUND.name()));
+                .orElseThrow(() -> new VehicleNotFoundException(ErrorMessage.VEHICLE_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
 
         Appointment entity = appointmentMapper.createRequestToEntity(createRequest);
         entity.setVehicleId(vehicle.getId());
@@ -45,10 +45,14 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public AppointmentUpdateResponse update(Long id , AppointmentUpdateRequest updateRequest) {
+    public AppointmentUpdateResponse update(Long id, AppointmentUpdateRequest updateRequest) {
         Appointment entity = appointmentRepository.findById(id)
                 .orElseThrow(() -> new AppointmentNotFoundException(ErrorMessage.APPOINTMENT_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
         Appointment update = appointmentMapper.updateRequestToEntity(entity, updateRequest);
+
+        update.setDate(updateRequest.getDate());
+        update.setServiceDescription(updateRequest.getServiceDescription());
+
         appointmentRepository.save(update);
         return appointmentMapper.entityToUpdateResponse(update);
     }
@@ -69,7 +73,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long userId, Long id) {
+
+        User userReadResponse = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
+        if (!userReadResponse.getRoleType().equals(RoleType.ADMIN)) {
+            throw new UserUnAuthorizedException(ErrorMessage.USER_UNAUTHORIZED, HttpStatus.UNAUTHORIZED.name());
+        }
         Appointment entity = appointmentRepository.findById(id)
                 .orElseThrow(() -> new AppointmentNotFoundException(ErrorMessage.APPOINTMENT_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
         appointmentRepository.deleteById(entity.getId());
@@ -84,7 +93,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public AppointmentStatusUpdateResponse statusUpdate( Long userId, Long appointmentId, RequestStatus status) {
+    public AppointmentStatusUpdateResponse statusUpdate(Long userId, Long appointmentId, RequestStatus status) {
 
         User changerUser = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
@@ -109,18 +118,18 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public void deleteCompleted(Long appointmentId) {
 
-        Appointment appointment =  appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new AppointmentNotFoundException(ErrorMessage.APPOINTMENT_NOT_FOUND,HttpStatus.NOT_FOUND.name()));
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new AppointmentNotFoundException(ErrorMessage.APPOINTMENT_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
 
-        if (!appointment.getStatus().equals(RequestStatus.COMPLETED)){
-            throw  new AppointmentNotCompleted(ErrorMessage.APPOINTMENT_NOT_COMPLETED,HttpStatus.BAD_REQUEST.name());
+        if (!appointment.getStatus().equals(RequestStatus.COMPLETED)) {
+            throw new AppointmentNotCompleted(ErrorMessage.APPOINTMENT_NOT_COMPLETED, HttpStatus.BAD_REQUEST.name());
         }
         appointmentRepository.deleteById(appointment.getId());
 
 
     }
 
+    //process tamamlanibsa databazadan silmek yeni, usta isini bitiribse
+    //gorusu bitirmek
 }
 
-//process tamamlanibsa databazadan silmek yeni, usta isini bitiribse
-//gorusu bitirmek

@@ -53,6 +53,14 @@ public class MechanicServiceImpl implements MechanicService {
         Mechanic entity = mechanicRepository
                 .findById(id).orElseThrow(() -> new MechanicNotFoundException(ErrorMessage.MECHANIC_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
         Mechanic savedMechanic = mechanicMapper.updateRequestToEntity(entity,updateRequest);
+
+        savedMechanic.setEmail(updateRequest.getEmail());
+        savedMechanic.setName(updateRequest.getName());
+        savedMechanic.setSpecialty(updateRequest.getSpecialty());
+
+
+
+
         mechanicRepository.save(savedMechanic);
         return mechanicMapper.entityToUpdateResponse(savedMechanic);
 
