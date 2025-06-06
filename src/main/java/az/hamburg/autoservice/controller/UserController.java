@@ -1,6 +1,7 @@
 package az.hamburg.autoservice.controller;
 
 import az.hamburg.autoservice.domain.RoleType;
+import az.hamburg.autoservice.model.user.request.UserChangePassword;
 import az.hamburg.autoservice.model.user.request.UserCreateRequest;
 import az.hamburg.autoservice.model.user.request.UserLoginRequest;
 import az.hamburg.autoservice.model.user.request.UserUpdateRequest;
@@ -65,5 +66,10 @@ public class UserController {
         return userService.roleUpdate(changerId, id, roleType);
     }
 
+    @PostMapping("/{userId}/change-password")
+    @ResponseStatus(HttpStatus.OK)
+    public String changePassword(@PathVariable Long userId, @RequestBody UserChangePassword changePassword) {
+        return userService.changePassword(userId, changePassword);
+    }
 
 }

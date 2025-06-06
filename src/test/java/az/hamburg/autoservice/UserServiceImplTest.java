@@ -2,6 +2,9 @@ package az.hamburg.autoservice;
 
 import az.hamburg.autoservice.domain.RoleType;
 import az.hamburg.autoservice.domain.User;
+import az.hamburg.autoservice.exception.handler.EmailAlreadyExistsException;
+import az.hamburg.autoservice.exception.handler.UserUnAuthorizedException;
+import az.hamburg.autoservice.exception.handler.WrongPhoneNumberException;
 import az.hamburg.autoservice.mappers.UserMapper;
 import az.hamburg.autoservice.model.user.request.UserCreateRequest;
 import az.hamburg.autoservice.model.user.request.UserLoginRequest;
@@ -12,11 +15,14 @@ import az.hamburg.autoservice.model.user.response.UserRoleUpdateResponse;
 import az.hamburg.autoservice.model.user.response.UserUpdateResponse;
 import az.hamburg.autoservice.repository.UserRepository;
 import az.hamburg.autoservice.service.impl.UserServiceImpl;
+import az.hamburg.autoservice.util.UserUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -25,8 +31,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+@ExtendWith(MockitoExtension.class)
+public class UserServiceImplTest {
 
-class UserServiceImplTest {
+    @InjectMocks
+    private UserServiceImpl userService;
 
     @Mock
     private UserRepository userRepository;
@@ -37,142 +46,140 @@ class UserServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @InjectMocks
-    private UserServiceImpl userService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
-    void testCreate_Success() {
-        UserCreateRequest request = new UserCreateRequest();
-        request.setPhone("+994501234567");
-        request.setEmail("test@example.com");
-        request.setPassword("plainPass");
+    void testCreateUser_Success() {
+        UserCreateRequest request = UserUtil.createRequest();
+        User user = UserUtil.user(RoleType.USER);
 
-        when(userRepository.findAll()).thenReturn(Collections.emptyList());
-
-        User userEntity = new User();
-        when(userMapper.createRequestToEntity(request)).thenReturn(userEntity);
-        when(passwordEncoder.encode("plainPass")).thenReturn("encodedPass");
-        when(userRepository.save(any(User.class))).thenReturn(userEntity);
-        UserCreateResponse expectedResponse = new UserCreateResponse();
-        when(userMapper.entityToCreateResponse(userEntity)).thenReturn(expectedResponse);
+        when(userRepository.findAll()).thenReturn(List.of());
+        when(userMapper.createRequestToEntity(request)).thenReturn(user);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encoded_password");
+        when(userMapper.entityToCreateResponse(user)).thenReturn(UserUtil.userCreateResponse());
 
         UserCreateResponse response = userService.create(request);
 
         assertNotNull(response);
-        verify(userRepository).save(any(User.class));
+        verify(userRepository).save(user);
     }
 
     @Test
-    void testGetId_Success() {
-        User user = new User();
-        user.setId(1L);
+    void testCreateUser_InvalidPhone() {
+        UserCreateRequest request = UserUtil.createRequest();
+        request.setPhone("+1234512345");
+
+        assertThrows(WrongPhoneNumberException.class, () -> userService.create(request));
+    }
+
+    @Test
+    void testCreateUser_EmailExists() {
+        UserCreateRequest request = UserUtil.createRequest();
+        User existing = UserUtil.user(RoleType.USER);
+
+        when(userRepository.findAll()).thenReturn(List.of(existing));
+
+        assertThrows(EmailAlreadyExistsException.class, () -> userService.create(request));
+    }
+
+    @Test
+    void testGetById_Success() {
+        User user = UserUtil.user(RoleType.USER);
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        UserReadResponse expectedResponse = new UserReadResponse();
-        when(userMapper.entityToReadResponse(user)).thenReturn(expectedResponse);
+        when(userMapper.entityToReadResponse(user)).thenReturn(UserUtil.userReadResponse());
 
         UserReadResponse response = userService.getId(1L);
 
         assertNotNull(response);
-        verify(userRepository).findById(1L);
     }
 
     @Test
-    void testGetAll_Success() {
-        List<User> users = List.of(new User());
-        when(userRepository.findAll()).thenReturn(users);
-        when(userMapper.entityToReadResponse(any(User.class))).thenReturn(new UserReadResponse());
+    void testGetAllUsers() {
+        User user = UserUtil.user(RoleType.USER);
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(userMapper.entityToReadResponse(user)).thenReturn(UserUtil.userReadResponse());
 
-        List<UserReadResponse> responses = userService.getAll();
+        List<UserReadResponse> result = userService.getAll();
 
-        assertEquals(1, responses.size());
-        verify(userRepository).findAll();
+        assertEquals(1, result.size());
     }
 
     @Test
-    void testUpdate_Success() {
-        UserUpdateRequest request = new UserUpdateRequest();
-        User existingUser = new User();
-        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
-        User updatedUser = new User();
-        when(userMapper.updateRequestToEntity(existingUser, request)).thenReturn(updatedUser);
-        when(userRepository.save(updatedUser)).thenReturn(updatedUser);
-        UserUpdateResponse expectedResponse = new UserUpdateResponse();
-        when(userMapper.entityToUpdateResponse(updatedUser)).thenReturn(expectedResponse);
+    void testUpdateUser_Success() {
+        User user = UserUtil.user(RoleType.USER);
+        UserUpdateRequest updateRequest = UserUtil.updateRequest();
 
-        UserUpdateResponse response = userService.update(1L, request);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userMapper.updateRequestToEntity(user, updateRequest)).thenReturn(user);
+        when(userMapper.entityToUpdateResponse(user)).thenReturn(UserUtil.userUpdateResponse());
+
+        UserUpdateResponse response = userService.update(1L, updateRequest);
 
         assertNotNull(response);
-        verify(userRepository).save(updatedUser);
+        verify(userRepository).save(user);
     }
 
     @Test
-    void testDelete_Success() {
-        Long userId = 1L;
+    void testDeleteUser_AsAdmin() {
+        User admin = UserUtil.user(RoleType.ADMIN);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(admin));
 
-        User adminUser = new User();
-        adminUser.setId(userId);
-        adminUser.setRoleType(RoleType.ADMIN);
+        userService.delete(1L);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(adminUser));
-
-        userService.delete(userId);
-
-        verify(userRepository, times(1)).deleteById(userId);
+        verify(userRepository).deleteById(1L);
     }
+
+    @Test
+    void testDeleteUser_Unauthorized() {
+        User user = UserUtil.user(RoleType.USER);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        assertThrows(UserUnAuthorizedException.class, () -> userService.delete(1L));
+    }
+
     @Test
     void testLoginUser_Success() {
-        String username = "testuser";
-        String rawPassword = "password";
-        String encodedPassword = "$2a$10$encodedpassword";
+        User user = UserUtil.user(RoleType.USER);
+        when(userRepository.findByUsername("johnny")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("Password123!", user.getPassword())).thenReturn(true);
 
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(encodedPassword);
-
-        UserLoginRequest request = new UserLoginRequest();
-        request.setUsername(username);
-        request.setPassword(rawPassword);
-
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
-
-        String result = userService.loginUser(request);
-
+        String result = userService.loginUser(UserUtil.loginRequest("johnny", "Password123!"));
         assertEquals("login successful", result);
     }
 
     @Test
+    void testLoginUser_WrongPassword() {
+        User user = UserUtil.user(RoleType.USER);
+        when(userRepository.findByUsername("johnny")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrong", user.getPassword())).thenReturn(false);
+
+        String result = userService.loginUser(UserUtil.loginRequest("johnny", "wrong"));
+        assertEquals("Password is incorrect", result);
+    }
+
+    @Test
     void testRoleUpdate_Success() {
-        Long changerId = 1L;
-        Long targetId = 2L;
-        RoleType newRole = RoleType.MODERATOR;
+        User changer = UserUtil.user(RoleType.ADMIN);
+        User target = UserUtil.user(RoleType.USER);
+        target.setId(2L);
 
-        User changerUser = new User();
-        changerUser.setId(changerId);
-        changerUser.setRoleType(RoleType.ADMIN);
+        when(userRepository.findById(2L)).thenReturn(Optional.of(target));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(changer));
+        when(userMapper.entityToUserRoleUpdateResponse(target)).thenReturn(UserUtil.userRoleUpdateResponse());
 
-        User targetUser = new User();
-        targetUser.setId(targetId);
-        targetUser.setRoleType(RoleType.USER);
-
-        UserRoleUpdateResponse expectedResponse = new UserRoleUpdateResponse();
-
-        when(userRepository.findById(changerId)).thenReturn(Optional.of(changerUser));
-        when(userRepository.findById(targetId)).thenReturn(Optional.of(targetUser));
-        when(userRepository.save(any(User.class))).thenReturn(targetUser);
-        when(userMapper.entityToUserRoleUpdateResponse(targetUser)).thenReturn(expectedResponse);
-
-        UserRoleUpdateResponse response = userService.roleUpdate(changerId, targetId, newRole);
+        UserRoleUpdateResponse response = userService.roleUpdate(1L, 2L, RoleType.MODERATOR);
 
         assertNotNull(response);
-        assertEquals(expectedResponse, response);
+        verify(userRepository).save(target);
+    }
 
-        verify(userRepository, times(1)).save(targetUser);
+    @Test
+    void testRoleUpdate_Unauthorized() {
+        User changer = UserUtil.user(RoleType.USER);
+        User target = UserUtil.user(RoleType.USER);
+
+        when(userRepository.findById(2L)).thenReturn(Optional.of(target));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(changer));
+
+        assertThrows(UserUnAuthorizedException.class, () -> userService.roleUpdate(1L, 2L, RoleType.ADMIN));
     }
 }
 
