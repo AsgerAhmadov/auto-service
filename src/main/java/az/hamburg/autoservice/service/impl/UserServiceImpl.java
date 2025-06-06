@@ -8,6 +8,7 @@ import az.hamburg.autoservice.exception.handler.UserNotFoundException;
 import az.hamburg.autoservice.exception.handler.UserUnAuthorizedException;
 import az.hamburg.autoservice.exception.handler.WrongPhoneNumberException;
 import az.hamburg.autoservice.mappers.UserMapper;
+import az.hamburg.autoservice.model.user.request.UserChangePassword;
 import az.hamburg.autoservice.model.user.request.UserCreateRequest;
 import az.hamburg.autoservice.model.user.request.UserLoginRequest;
 import az.hamburg.autoservice.model.user.request.UserUpdateRequest;
@@ -149,5 +150,32 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public String changePassword(Long userId, UserChangePassword changePassword) {
+        User foundedUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(ErrorMessage.USER_NOT_FOUND, HttpStatus.NOT_FOUND.name()));
+
+        if (!passwordEncoder.matches(changePassword.getOldPassword(), foundedUser.getPassword())){
+            return "Old password is incorrect";
+
+        } else if (!changePassword.getNewPassword().equals(changePassword.getConfirmPassword())){
+            return "Confirm password is incorrect";
+        }
+
+        foundedUser.setPassword(passwordEncoder.encode(changePassword.getNewPassword()));
+        userRepository.save(foundedUser);
+        return "Password changed";
+
+    }
+
 
 }
+
+//todo: kohne parolu baza ile yoxlamaq ( hash olunmus versiya )
+
+//todo: old password,new password,confirm password
+
+//salt mentiqi ile encription tetbiq etmek.(encription service yazilmalidir (password
+// encodr kitabxanasinin manual formasidir )-verify password mentiqi)
+
+

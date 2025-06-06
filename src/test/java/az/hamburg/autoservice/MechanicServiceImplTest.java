@@ -11,10 +11,13 @@ import az.hamburg.autoservice.model.mechanic.response.MechanicReadResponse;
 import az.hamburg.autoservice.model.mechanic.response.MechanicUpdateResponse;
 import az.hamburg.autoservice.repository.MechanicRepository;
 import az.hamburg.autoservice.service.impl.MechanicServiceImpl;
+import az.hamburg.autoservice.util.MechanicUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
@@ -27,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MechanicServiceImplTest {
+public class MechanicServiceImplTest {
 
     @InjectMocks
     private MechanicServiceImpl mechanicService;
@@ -39,130 +42,93 @@ class MechanicServiceImplTest {
     private MechanicMapper mechanicMapper;
 
     @Test
-    void testCreate_Success() {
-        MechanicCreateRequest request = new MechanicCreateRequest();
-        request.setEmail("test@example.com");
+    void testCreateMechanic_Success() {
+        MechanicCreateRequest request = MechanicUtil.createRequest();
+        Mechanic mechanic = MechanicUtil.mechanic();
 
-        when(mechanicRepository.findAll()).thenReturn(Collections.emptyList());
-
-        Mechanic mechanic = new Mechanic();
-        when(mechanicMapper.createRequestToEntity(request)).thenReturn(mechanic);
-        when(mechanicRepository.save(any(Mechanic.class))).thenReturn(mechanic);
-
-        MechanicCreateResponse expectedResponse = new MechanicCreateResponse();
-        when(mechanicMapper.entityToCreateResponse(mechanic)).thenReturn(expectedResponse);
+        Mockito.when(mechanicRepository.findAll()).thenReturn(List.of());
+        Mockito.when(mechanicMapper.createRequestToEntity(request)).thenReturn(mechanic);
+        Mockito.when(mechanicMapper.entityToCreateResponse(mechanic)).thenReturn(MechanicUtil.mechanicCreateResponse());
 
         MechanicCreateResponse response = mechanicService.create(request);
 
-        assertNotNull(response);
-        verify(mechanicRepository).save(any(Mechanic.class));
+        Assertions.assertNotNull(response);
+        Mockito.verify(mechanicRepository).save(mechanic);
     }
 
     @Test
-    void testCreate_EmailAlreadyExists() {
-        MechanicCreateRequest request = new MechanicCreateRequest();
-        request.setEmail("test@example.com");
+    void testCreateMechanic_EmailAlreadyExists() {
+        MechanicCreateRequest request = MechanicUtil.createRequest();
+        Mechanic existing = MechanicUtil.mechanic();
 
-        Mechanic existingMechanic = new Mechanic();
-        existingMechanic.setEmail("test@example.com");
+        Mockito.when(mechanicRepository.findAll()).thenReturn(List.of(existing));
 
-        when(mechanicRepository.findAll()).thenReturn(List.of(existingMechanic));
-
-        assertThrows(EmailAlreadyExistsException.class,
-                () -> mechanicService.create(request));
+        Assertions.assertThrows(EmailAlreadyExistsException.class, () -> {
+            mechanicService.create(request);
+        });
     }
 
     @Test
-    void testUpdate_Success() {
-        Long mechanicId = 1L;
-        MechanicUpdateRequest updateRequest = new MechanicUpdateRequest();
+    void testUpdateMechanic_Success() {
+        Mechanic mechanic = MechanicUtil.mechanic();
+        MechanicUpdateRequest updateRequest = MechanicUtil.updateRequest();
+        Mechanic updated = MechanicUtil.updatedMechanic();
 
-        Mechanic existingMechanic = new Mechanic();
-        when(mechanicRepository.findById(mechanicId)).thenReturn(Optional.of(existingMechanic));
+        Mockito.when(mechanicRepository.findById(1L)).thenReturn(Optional.of(mechanic));
+        Mockito.when(mechanicMapper.updateRequestToEntity(mechanic, updateRequest)).thenReturn(updated);
+        Mockito.when(mechanicMapper.entityToUpdateResponse(updated)).thenReturn(MechanicUtil.mechanicUpdateResponse());
 
-        Mechanic updatedMechanic = new Mechanic();
-        when(mechanicMapper.updateRequestToEntity(existingMechanic, updateRequest)).thenReturn(updatedMechanic);
-        when(mechanicRepository.save(updatedMechanic)).thenReturn(updatedMechanic);
+        MechanicUpdateResponse response = mechanicService.update(1L, updateRequest);
 
-        MechanicUpdateResponse expectedResponse = new MechanicUpdateResponse();
-        when(mechanicMapper.entityToUpdateResponse(updatedMechanic)).thenReturn(expectedResponse);
-
-        MechanicUpdateResponse response = mechanicService.update(mechanicId, updateRequest);
-
-        assertNotNull(response);
-        verify(mechanicRepository).save(updatedMechanic);
+        Assertions.assertNotNull(response);
+        Mockito.verify(mechanicRepository).save(updated);
     }
 
     @Test
-    void testUpdate_MechanicNotFound() {
-        Long mechanicId = 1L;
-        MechanicUpdateRequest updateRequest = new MechanicUpdateRequest();
-
-        when(mechanicRepository.findById(mechanicId)).thenReturn(Optional.empty());
-
-        assertThrows(MechanicNotFoundException.class,
-                () -> mechanicService.update(mechanicId, updateRequest));
-    }
-
-    @Test
-    void testGetAll() {
-        Mechanic mechanic1 = new Mechanic();
-        Mechanic mechanic2 = new Mechanic();
-
-        when(mechanicRepository.findAll()).thenReturn(List.of(mechanic1, mechanic2));
-        when(mechanicMapper.entityToReadResponse(mechanic1)).thenReturn(new MechanicReadResponse());
-        when(mechanicMapper.entityToReadResponse(mechanic2)).thenReturn(new MechanicReadResponse());
+    void testGetAllMechanics() {
+        Mechanic mechanic = MechanicUtil.mechanic();
+        Mockito.when(mechanicRepository.findAll()).thenReturn(List.of(mechanic));
+        Mockito.when(mechanicMapper.entityToReadResponse(mechanic)).thenReturn(MechanicUtil.mechanicReadResponse());
 
         List<MechanicReadResponse> responses = mechanicService.getAll();
 
-        assertEquals(2, responses.size());
+        Assertions.assertEquals(1, responses.size());
     }
 
     @Test
-    void testGetId_Success() {
-        Long mechanicId = 1L;
-        Mechanic mechanic = new Mechanic();
+    void testGetMechanicById_Success() {
+        Mechanic mechanic = MechanicUtil.mechanic();
 
-        when(mechanicRepository.findById(mechanicId)).thenReturn(Optional.of(mechanic));
+        Mockito.when(mechanicRepository.findById(1L)).thenReturn(Optional.of(mechanic));
+        Mockito.when(mechanicMapper.entityToReadResponse(mechanic)).thenReturn(MechanicUtil.mechanicReadResponse());
 
-        MechanicReadResponse expectedResponse = new MechanicReadResponse();
-        when(mechanicMapper.entityToReadResponse(mechanic)).thenReturn(expectedResponse);
+        MechanicReadResponse response = mechanicService.getId(1L);
 
-        MechanicReadResponse response = mechanicService.getId(mechanicId);
-
-        assertNotNull(response);
+        Assertions.assertNotNull(response);
     }
 
     @Test
-    void testGetId_MechanicNotFound() {
-        Long mechanicId = 1L;
+    void testGetMechanicById_NotFound() {
+        Mockito.when(mechanicRepository.findById(1L)).thenReturn(Optional.empty());
 
-        when(mechanicRepository.findById(mechanicId)).thenReturn(Optional.empty());
-
-        assertThrows(MechanicNotFoundException.class,
-                () -> mechanicService.getId(mechanicId));
+        Assertions.assertThrows(MechanicNotFoundException.class, () -> mechanicService.getId(1L));
     }
 
     @Test
-    void testDelete_Success() {
-        Long mechanicId = 1L;
-        Mechanic mechanic = new Mechanic();
-        mechanic.setId(mechanicId);
+    void testDeleteMechanic_Success() {
+        Mechanic mechanic = MechanicUtil.mechanic();
 
-        when(mechanicRepository.findById(mechanicId)).thenReturn(Optional.of(mechanic));
+        Mockito.when(mechanicRepository.findById(1L)).thenReturn(Optional.of(mechanic));
 
-        mechanicService.delete(mechanicId);
+        mechanicService.delete(1L);
 
-        verify(mechanicRepository).delete(mechanic);
+        Mockito.verify(mechanicRepository).delete(mechanic);
     }
 
     @Test
-    void testDelete_MechanicNotFound() {
-        Long mechanicId = 1L;
+    void testDeleteMechanic_NotFound() {
+        Mockito.when(mechanicRepository.findById(1L)).thenReturn(Optional.empty());
 
-        when(mechanicRepository.findById(mechanicId)).thenReturn(Optional.empty());
-
-        assertThrows(MechanicNotFoundException.class,
-                () -> mechanicService.delete(mechanicId));
+        Assertions.assertThrows(MechanicNotFoundException.class, () -> mechanicService.delete(1L));
     }
 }

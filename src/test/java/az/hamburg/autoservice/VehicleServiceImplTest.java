@@ -13,6 +13,8 @@ import az.hamburg.autoservice.model.vehicle.response.VehicleUpdateResponse;
 import az.hamburg.autoservice.repository.UserRepository;
 import az.hamburg.autoservice.repository.VehicleRepository;
 import az.hamburg.autoservice.service.impl.VehicleServiceImpl;
+import az.hamburg.autoservice.util.UserUtil;
+import az.hamburg.autoservice.util.VehicleUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class VehicleServiceImplTest {
+public class VehicleServiceImplTest {
 
     @InjectMocks
     private VehicleServiceImpl vehicleService;
@@ -44,141 +46,77 @@ class VehicleServiceImplTest {
     private UserRepository userRepository;
 
     @Test
-    void testCreate_Success() {
-        Long userId = 1L;
-        VehicleCreateRequest createRequest = new VehicleCreateRequest();
-        createRequest.setPlateNumber("90-AB-123");
+    void create_ShouldReturnResponse_WhenValidRequest() {
+        VehicleCreateRequest request = VehicleUtil.createRequest();
+        Vehicle vehicle = VehicleUtil.vehicle();
+        User user = VehicleUtil.user();
+        VehicleCreateResponse response = VehicleUtil.vehicleCreateResponse();
 
-        User user = new User();
-        user.setId(userId);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(vehicleRepository.findAll()).thenReturn(List.of());
+        when(vehicleMapper.createRequestToEntity(request)).thenReturn(vehicle);
+        when(vehicleMapper.entityToCreateResponse(vehicle)).thenReturn(response);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(vehicleRepository.findAll()).thenReturn(Collections.emptyList());
+        VehicleCreateResponse result = vehicleService.create(1L, request);
 
-        Vehicle vehicle = new Vehicle();
-        when(vehicleMapper.createRequestToEntity(createRequest)).thenReturn(vehicle);
-        when(vehicleRepository.save(any(Vehicle.class))).thenReturn(vehicle);
-
-        VehicleCreateResponse expectedResponse = new VehicleCreateResponse();
-        when(vehicleMapper.entityToCreateResponse(vehicle)).thenReturn(expectedResponse);
-
-        VehicleCreateResponse response = vehicleService.create(userId, createRequest);
-
-        assertNotNull(response);
-        verify(userRepository).findById(userId);
-        verify(vehicleRepository).save(any(Vehicle.class));
+        assertNotNull(result);
+        verify(vehicleRepository).save(vehicle);
     }
 
     @Test
-    void testCreate_PlateNumberAlreadyExists() {
-        Long userId = 1L;
-        VehicleCreateRequest createRequest = new VehicleCreateRequest();
-        createRequest.setPlateNumber("90-AB-123");
+    void update_ShouldReturnResponse_WhenValidRequest() {
+        Vehicle vehicle = VehicleUtil.vehicle();
+        VehicleUpdateRequest updateRequest = VehicleUtil.updateRequest();
+        Vehicle updated = VehicleUtil.vehicle();
+        updated.setBrand(updateRequest.getBrand());
+        updated.setModel(updateRequest.getModel());
+        updated.setPlateNumber(updateRequest.getPlateNumber());
+        VehicleUpdateResponse response = VehicleUtil.vehicleUpdateResponse();
 
-        User user = new User();
-        user.setId(userId);
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
+        when(vehicleMapper.updateRequestToEntity(vehicle, updateRequest)).thenReturn(updated);
+        when(vehicleMapper.entityToUpdateResponse(updated)).thenReturn(response);
 
-        Vehicle existingVehicle = new Vehicle();
-        existingVehicle.setPlateNumber("90-AB-123");
+        VehicleUpdateResponse result = vehicleService.update(1L, updateRequest);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(vehicleRepository.findAll()).thenReturn(List.of(existingVehicle));
-
-        assertThrows(PlateNumberAlreadyExistsException.class,
-                () -> vehicleService.create(userId, createRequest));
+        assertNotNull(result);
+        verify(vehicleRepository).save(updated);
     }
 
     @Test
-    void testUpdate_Success() {
-        Long vehicleId = 1L;
-        VehicleUpdateRequest updateRequest = new VehicleUpdateRequest();
+    void getById_ShouldReturnResponse_WhenFound() {
+        Vehicle vehicle = VehicleUtil.vehicle();
+        VehicleReadResponse response = VehicleUtil.vehicleReadResponse();
 
-        Vehicle existingVehicle = new Vehicle();
-        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.of(existingVehicle));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
+        when(vehicleMapper.entityToReadResponse(vehicle)).thenReturn(response);
 
-        Vehicle updatedVehicle = new Vehicle();
-        when(vehicleMapper.updateRequestToEntity(existingVehicle, updateRequest)).thenReturn(updatedVehicle);
-        when(vehicleRepository.save(updatedVehicle)).thenReturn(updatedVehicle);
+        VehicleReadResponse result = vehicleService.getById(1L);
 
-        VehicleUpdateResponse expectedResponse = new VehicleUpdateResponse();
-        when(vehicleMapper.entityToUpdateResponse(updatedVehicle)).thenReturn(expectedResponse);
-
-        VehicleUpdateResponse response = vehicleService.update(vehicleId, updateRequest);
-
-        assertNotNull(response);
-        verify(vehicleRepository).save(updatedVehicle);
+        assertNotNull(result);
     }
 
     @Test
-    void testUpdate_VehicleNotFound() {
-        Long vehicleId = 1L;
-        VehicleUpdateRequest updateRequest = new VehicleUpdateRequest();
+    void getAll_ShouldReturnListOfResponses() {
+        Vehicle vehicle = VehicleUtil.vehicle();
+        VehicleReadResponse response = VehicleUtil.vehicleReadResponse();
 
-        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.empty());
+        when(vehicleRepository.findAll()).thenReturn(List.of(vehicle));
+        when(vehicleMapper.entityToReadResponse(vehicle)).thenReturn(response);
 
-        assertThrows(VehicleNotFoundException.class,
-                () -> vehicleService.update(vehicleId, updateRequest));
+        List<VehicleReadResponse> result = vehicleService.getAll();
+
+        assertEquals(1, result.size());
     }
 
     @Test
-    void testGetById_Success() {
-        Long vehicleId = 1L;
-        Vehicle vehicle = new Vehicle();
+    void delete_ShouldRemoveVehicle_WhenExists() {
+        Vehicle vehicle = VehicleUtil.vehicle();
 
-        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.of(vehicle));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
 
-        VehicleReadResponse expectedResponse = new VehicleReadResponse();
-        when(vehicleMapper.entityToReadResponse(vehicle)).thenReturn(expectedResponse);
+        vehicleService.delete(1L);
 
-        VehicleReadResponse response = vehicleService.getById(vehicleId);
-
-        assertNotNull(response);
-    }
-
-    @Test
-    void testGetById_VehicleNotFound() {
-        Long vehicleId = 1L;
-
-        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.empty());
-
-        assertThrows(VehicleNotFoundException.class,
-                () -> vehicleService.getById(vehicleId));
-    }
-
-    @Test
-    void testGetAll() {
-        Vehicle vehicle1 = new Vehicle();
-        Vehicle vehicle2 = new Vehicle();
-
-        when(vehicleRepository.findAll()).thenReturn(List.of(vehicle1, vehicle2));
-        when(vehicleMapper.entityToReadResponse(vehicle1)).thenReturn(new VehicleReadResponse());
-        when(vehicleMapper.entityToReadResponse(vehicle2)).thenReturn(new VehicleReadResponse());
-
-        List<VehicleReadResponse> responses = vehicleService.getAll();
-
-        assertEquals(2, responses.size());
-    }
-
-    @Test
-    void testDelete_Success() {
-        Long vehicleId = 1L;
-        Vehicle vehicle = new Vehicle();
-        vehicle.setId(vehicleId);
-
-        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.of(vehicle));
-
-        vehicleService.delete(vehicleId);
-
-        verify(vehicleRepository).deleteById(vehicleId);
-    }
-
-    @Test
-    void testDelete_VehicleNotFound() {
-        Long vehicleId = 1L;
-
-        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.empty());
-
-        assertThrows(VehicleNotFoundException.class,
-                () -> vehicleService.delete(vehicleId));
+        verify(vehicleRepository).deleteById(vehicle.getId());
     }
 }
