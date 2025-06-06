@@ -129,7 +129,5 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     }
 
-    //process tamamlanibsa databazadan silmek yeni, usta isini bitiribse
-    //gorusu bitirmek
 }
 

@@ -1,6 +1,7 @@
 package az.hamburg.autoservice.service;
 
 import az.hamburg.autoservice.domain.RoleType;
+import az.hamburg.autoservice.model.user.request.UserChangePassword;
 import az.hamburg.autoservice.model.user.request.UserCreateRequest;
 import az.hamburg.autoservice.model.user.request.UserLoginRequest;
 import az.hamburg.autoservice.model.user.request.UserUpdateRequest;
@@ -23,5 +24,7 @@ public interface UserService {
      String loginUser(UserLoginRequest request);
 
     UserRoleUpdateResponse roleUpdate( Long changerId, Long id, RoleType roleType);
+
+     String changePassword(Long userId, UserChangePassword changePassword);
 
 }

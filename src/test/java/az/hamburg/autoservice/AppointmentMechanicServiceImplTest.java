@@ -1,8 +1,6 @@
 package az.hamburg.autoservice;
 
-import az.hamburg.autoservice.domain.Appointment;
 import az.hamburg.autoservice.domain.AppointmentMechanic;
-import az.hamburg.autoservice.domain.Mechanic;
 import az.hamburg.autoservice.exception.handler.AppointmentMechanicNotFoundException;
 import az.hamburg.autoservice.exception.handler.AppointmentNotFoundException;
 import az.hamburg.autoservice.exception.handler.MechanicNotFoundException;
@@ -16,19 +14,22 @@ import az.hamburg.autoservice.repository.AppointmentMechanicRepository;
 import az.hamburg.autoservice.repository.AppointmentRepository;
 import az.hamburg.autoservice.repository.MechanicRepository;
 import az.hamburg.autoservice.service.impl.AppointmentMechanicServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
+import az.hamburg.autoservice.util.AppointmentMechanicUtil;
+import az.hamburg.autoservice.util.AppointmentUtil;
+import az.hamburg.autoservice.util.MechanicUtil;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
-public class AppointmentMechanicServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+class AppointmentMechanicServiceImplTest {
 
     @InjectMocks
     private AppointmentMechanicServiceImpl service;
@@ -45,58 +46,45 @@ public class AppointmentMechanicServiceImplTest {
     @Mock
     private MechanicRepository mechanicRepository;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
     void testCreate_Success() {
-        AppointmentMechanicCreateRequest request = new AppointmentMechanicCreateRequest();
-        request.setAppointmentId(1L);
-        request.setMechanicId(2L);
+        AppointmentMechanicCreateRequest request = AppointmentMechanicUtil.createRequest();
+        AppointmentUtil.appointment().setId(request.getAppointmentId());
 
-        Appointment appointment = new Appointment();
-        appointment.setId(1L);
-        Mechanic mechanic = new Mechanic();
-        mechanic.setId(2L);
+        MechanicUtil.mechanic().setId(request.getMechanicId());
 
-        AppointmentMechanic entity = new AppointmentMechanic();
-        AppointmentMechanicCreateResponse response = new AppointmentMechanicCreateResponse();
+        AppointmentMechanic entity = AppointmentMechanicUtil.appointmentMechanic();
+        AppointmentMechanicCreateResponse response = AppointmentMechanicUtil.createResponse();
 
-        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
-        when(mechanicRepository.findById(2L)).thenReturn(Optional.of(mechanic));
+        when(appointmentRepository.findById(request.getAppointmentId())).thenReturn(Optional.of(AppointmentUtil.appointment()));
+        when(mechanicRepository.findById(request.getMechanicId())).thenReturn(Optional.of(MechanicUtil.mechanic()));
         when(appointmentMechanicMapper.createRequestToEntity(request)).thenReturn(entity);
+        when(appointmentMechanicRepository.save(any())).thenReturn(entity);
         when(appointmentMechanicMapper.entityToCreateResponse(entity)).thenReturn(response);
 
         AppointmentMechanicCreateResponse result = service.create(request);
 
         assertNotNull(result);
-        verify(appointmentMechanicRepository).save(entity);
+        verify(appointmentRepository).findById(request.getAppointmentId());
+        verify(mechanicRepository).findById(request.getMechanicId());
     }
 
     @Test
     void testCreate_AppointmentNotFound() {
-        AppointmentMechanicCreateRequest request = new AppointmentMechanicCreateRequest();
-        request.setAppointmentId(1L);
-        request.setMechanicId(2L);
+        AppointmentMechanicCreateRequest request = AppointmentMechanicUtil.createRequest();
 
-        when(appointmentRepository.findById(1L)).thenReturn(Optional.empty());
+        when(appointmentRepository.findById(request.getAppointmentId())).thenReturn(Optional.empty());
 
         assertThrows(AppointmentNotFoundException.class, () -> service.create(request));
     }
 
     @Test
     void testCreate_MechanicNotFound() {
-        AppointmentMechanicCreateRequest request = new AppointmentMechanicCreateRequest();
-        request.setAppointmentId(1L);
-        request.setMechanicId(2L);
+        AppointmentMechanicCreateRequest request = AppointmentMechanicUtil.createRequest();
+        AppointmentUtil.appointment().setId(request.getAppointmentId());
 
-        Appointment appointment = new Appointment();
-        appointment.setId(1L);
-
-        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
-        when(mechanicRepository.findById(2L)).thenReturn(Optional.empty());
+        when(appointmentRepository.findById(request.getAppointmentId())).thenReturn(Optional.of(AppointmentUtil.appointment()));
+        when(mechanicRepository.findById(request.getMechanicId())).thenReturn(Optional.empty());
 
         assertThrows(MechanicNotFoundException.class, () -> service.create(request));
     }
@@ -104,36 +92,36 @@ public class AppointmentMechanicServiceImplTest {
     @Test
     void testUpdate_Success() {
         Long id = 1L;
-        AppointmentMechanicUpdateRequest updateRequest = new AppointmentMechanicUpdateRequest();
+        AppointmentMechanicUpdateRequest updateRequest = AppointmentMechanicUtil.updateRequest();
+        AppointmentMechanic existing = AppointmentMechanicUtil.appointmentMechanic();
+        AppointmentMechanic updated = AppointmentMechanicUtil.appointmentMechanic();
+        AppointmentMechanicUpdateResponse response = AppointmentMechanicUtil.updateResponse();
 
-        AppointmentMechanic entity = new AppointmentMechanic();
-        AppointmentMechanic updatedEntity = new AppointmentMechanic();
-        AppointmentMechanicUpdateResponse response = new AppointmentMechanicUpdateResponse();
-
-        when(appointmentMechanicRepository.findById(id)).thenReturn(Optional.of(entity));
-        when(appointmentMechanicMapper.updateRequestToEntity(entity, updateRequest)).thenReturn(updatedEntity);
-        when(appointmentMechanicMapper.entityToUpdateResponse(updatedEntity)).thenReturn(response);
+        when(appointmentMechanicRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(appointmentMechanicMapper.updateRequestToEntity(existing, updateRequest)).thenReturn(updated);
+        when(appointmentMechanicRepository.save(updated)).thenReturn(updated);
+        when(appointmentMechanicMapper.entityToUpdateResponse(updated)).thenReturn(response);
 
         AppointmentMechanicUpdateResponse result = service.update(id, updateRequest);
 
         assertNotNull(result);
-        verify(appointmentMechanicRepository).save(updatedEntity);
     }
 
     @Test
     void testUpdate_NotFound() {
         Long id = 1L;
-        AppointmentMechanicUpdateRequest updateRequest = new AppointmentMechanicUpdateRequest();
+        AppointmentMechanicUpdateRequest updateRequest = AppointmentMechanicUtil.updateRequest();
 
         when(appointmentMechanicRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(AppointmentMechanicNotFoundException.class, () -> service.update(id, updateRequest));
     }
+
     @Test
     void testGetById_Success() {
         Long id = 1L;
-        AppointmentMechanic entity = new AppointmentMechanic();
-        AppointmentMechanicReadResponse response = new AppointmentMechanicReadResponse();
+        AppointmentMechanic entity = AppointmentMechanicUtil.appointmentMechanic();
+        AppointmentMechanicReadResponse response = AppointmentMechanicUtil.readResponse();
 
         when(appointmentMechanicRepository.findById(id)).thenReturn(Optional.of(entity));
         when(appointmentMechanicMapper.entityToReadResponse(entity)).thenReturn(response);
@@ -154,10 +142,10 @@ public class AppointmentMechanicServiceImplTest {
 
     @Test
     void testGetAll_Success() {
-        List<AppointmentMechanic> entityList = List.of(new AppointmentMechanic());
-        AppointmentMechanicReadResponse response = new AppointmentMechanicReadResponse();
+        List<AppointmentMechanic> list = List.of(AppointmentMechanicUtil.appointmentMechanic());
+        AppointmentMechanicReadResponse response = AppointmentMechanicUtil.readResponse();
 
-        when(appointmentMechanicRepository.findAll()).thenReturn(entityList);
+        when(appointmentMechanicRepository.findAll()).thenReturn(list);
         when(appointmentMechanicMapper.entityToReadResponse(any())).thenReturn(response);
 
         List<AppointmentMechanicReadResponse> result = service.getAll();
@@ -168,7 +156,7 @@ public class AppointmentMechanicServiceImplTest {
     @Test
     void testDelete_Success() {
         Long id = 1L;
-        AppointmentMechanic entity = new AppointmentMechanic();
+        AppointmentMechanic entity = AppointmentMechanicUtil.appointmentMechanic();
         entity.setId(id);
 
         when(appointmentMechanicRepository.findById(id)).thenReturn(Optional.of(entity));

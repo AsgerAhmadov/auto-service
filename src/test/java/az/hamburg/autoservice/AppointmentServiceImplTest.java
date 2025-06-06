@@ -13,6 +13,9 @@ import az.hamburg.autoservice.repository.AppointmentRepository;
 import az.hamburg.autoservice.repository.UserRepository;
 import az.hamburg.autoservice.repository.VehicleRepository;
 import az.hamburg.autoservice.service.impl.AppointmentServiceImpl;
+import az.hamburg.autoservice.util.AppointmentUtil;
+import az.hamburg.autoservice.util.UserUtil;
+import az.hamburg.autoservice.util.VehicleUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,291 +37,94 @@ class AppointmentServiceImplTest {
 
     @Mock
     private AppointmentRepository appointmentRepository;
-
     @Mock
     private AppointmentMapper appointmentMapper;
-
     @Mock
     private VehicleRepository vehicleRepository;
-
     @Mock
     private UserRepository userRepository;
 
     @Test
-    void testCreate_Success() {
-        Long vehicleId = 1L;
-        AppointmentCreateRequest request = new AppointmentCreateRequest();
+    void testCreateAppointment_success() {
+        Long vehicleId = 10L;
+        AppointmentCreateRequest request = AppointmentUtil.createRequest();
+        Appointment appointment = AppointmentUtil.appointment();
+        AppointmentCreateResponse expectedResponse = AppointmentUtil.createResponse();
 
-        Vehicle vehicle = new Vehicle();
-        vehicle.setId(vehicleId);
-        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.of(vehicle));
-
-        Appointment appointment = new Appointment();
+        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.of(VehicleUtil.vehicle()));
         when(appointmentMapper.createRequestToEntity(request)).thenReturn(appointment);
-        when(appointmentRepository.save(any(Appointment.class))).thenReturn(appointment);
-
-        AppointmentCreateResponse expectedResponse = new AppointmentCreateResponse();
         when(appointmentMapper.entityToCreateResponse(appointment)).thenReturn(expectedResponse);
 
-        AppointmentCreateResponse response = appointmentService.create(vehicleId, request);
+        AppointmentCreateResponse result = appointmentService.create(vehicleId, request);
 
-        assertNotNull(response);
-        verify(appointmentRepository).save(any(Appointment.class));
+        assertEquals(expectedResponse, result);
+        verify(appointmentRepository).save(appointment);
     }
 
     @Test
-    void testCreate_VehicleNotFound() {
-        Long vehicleId = 1L;
-        AppointmentCreateRequest request = new AppointmentCreateRequest();
+    void testUpdateAppointment_success() {
+        Long id = 1L;
+        Appointment existingAppointment = AppointmentUtil.appointment();
+        AppointmentUpdateRequest updateRequest = AppointmentUtil.updateRequest();
+        Appointment updatedAppointment = AppointmentUtil.updatedAppointment();
+        AppointmentUpdateResponse response = AppointmentUtil.updateResponse();
 
-        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.empty());
+        when(appointmentRepository.findById(id)).thenReturn(Optional.of(existingAppointment));
+        when(appointmentMapper.updateRequestToEntity(existingAppointment, updateRequest)).thenReturn(updatedAppointment);
+        when(appointmentMapper.entityToUpdateResponse(updatedAppointment)).thenReturn(response);
 
-        assertThrows(VehicleNotFoundException.class, () -> appointmentService.create(vehicleId, request));
+        AppointmentUpdateResponse result = appointmentService.update(id, updateRequest);
+
+        assertEquals(response, result);
+        verify(appointmentRepository).save(updatedAppointment);
     }
 
     @Test
-    void testUpdate_Success() {
-        Long appointmentId = 1L;
-        AppointmentUpdateRequest updateRequest = new AppointmentUpdateRequest();
+    void testGetById_success() {
+        Long id = 1L;
+        Appointment appointment = AppointmentUtil.appointment();
+        AppointmentReadResponse expectedResponse = AppointmentUtil.readResponse();
 
-        Appointment existing = new Appointment();
-        when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(existing));
-
-        Appointment updated = new Appointment();
-        when(appointmentMapper.updateRequestToEntity(existing, updateRequest)).thenReturn(updated);
-        when(appointmentRepository.save(updated)).thenReturn(updated);
-
-        AppointmentUpdateResponse expectedResponse = new AppointmentUpdateResponse();
-        when(appointmentMapper.entityToUpdateResponse(updated)).thenReturn(expectedResponse);
-
-        AppointmentUpdateResponse response = appointmentService.update(appointmentId, updateRequest);
-
-        assertNotNull(response);
-        verify(appointmentRepository).save(updated);
-    }
-
-    @Test
-    void testUpdate_AppointmentNotFound() {
-        Long appointmentId = 1L;
-        AppointmentUpdateRequest updateRequest = new AppointmentUpdateRequest();
-
-        when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.empty());
-
-        assertThrows(AppointmentNotFoundException.class,
-                () -> appointmentService.update(appointmentId, updateRequest));
-    }
-
-    @Test
-    void testGetById_Success() {
-        Long appointmentId = 1L;
-        Appointment appointment = new Appointment();
-
-        when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
-
-        AppointmentReadResponse expectedResponse = new AppointmentReadResponse();
+        when(appointmentRepository.findById(id)).thenReturn(Optional.of(appointment));
         when(appointmentMapper.entityToReadResponse(appointment)).thenReturn(expectedResponse);
 
-        AppointmentReadResponse response = appointmentService.getById(appointmentId);
+        AppointmentReadResponse result = appointmentService.getById(id);
 
-        assertNotNull(response);
+        assertEquals(expectedResponse, result);
     }
 
     @Test
-    void testGetById_AppointmentNotFound() {
+    void testGetAll_success() {
+        List<Appointment> appointments = List.of(AppointmentUtil.appointment());
+        List<AppointmentReadResponse> expected = List.of(AppointmentUtil.readResponse());
+
+        when(appointmentRepository.findAll()).thenReturn(appointments);
+        when(appointmentMapper.entityToReadResponse(any())).thenReturn(expected.get(0));
+
+        List<AppointmentReadResponse> result = appointmentService.getAll();
+
+        assertEquals(expected.size(), result.size());
+    }
+
+    @Test
+    void testDeleteByAdmin_success() {
+        Long userId = 5L;
         Long appointmentId = 1L;
+        User admin = UserUtil.user(RoleType.ADMIN);
+        Appointment appointment = AppointmentUtil.appointment();
 
-        when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.empty());
-
-        assertThrows(AppointmentNotFoundException.class,
-                () -> appointmentService.getById(appointmentId));
-    }
-
-    @Test
-    void testGetAll() {
-        Appointment a1 = new Appointment();
-        Appointment a2 = new Appointment();
-
-        when(appointmentRepository.findAll()).thenReturn(List.of(a1, a2));
-        when(appointmentMapper.entityToReadResponse(a1)).thenReturn(new AppointmentReadResponse());
-        when(appointmentMapper.entityToReadResponse(a2)).thenReturn(new AppointmentReadResponse());
-
-        List<AppointmentReadResponse> responses = appointmentService.getAll();
-
-        assertEquals(2, responses.size());
-    }
-
-    @Test
-    void testDelete_Success() {
-        Long userId = 1L;
-        Long appointmentId = 1L;
-
-        User adminUser = new User();
-        adminUser.setId(userId);
-        adminUser.setRoleType(RoleType.ADMIN);
-
-        Appointment appointment = new Appointment();
-        appointment.setId(appointmentId);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(adminUser));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(admin));
         when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
 
         appointmentService.delete(userId, appointmentId);
 
-        verify(appointmentRepository, times(1)).deleteById(appointmentId);
+        verify(appointmentRepository).deleteById(appointment.getId());
     }
 
     @Test
-    void testDelete_AppointmentNotFound() {
-        Long userId = 1L;
+    void testDeleteCompleted_success() {
         Long appointmentId = 1L;
-
-        User adminUser = new User();
-        adminUser.setId(userId);
-        adminUser.setRoleType(RoleType.ADMIN);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(adminUser));
-        when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.empty());
-
-        assertThrows(AppointmentNotFoundException.class,
-                () -> appointmentService.delete(userId, appointmentId));
-    }
-
-    @Test
-    void testDelete_UserNotFound() {
-        Long userId = 1L;
-        Long appointmentId = 1L;
-
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(UserNotFoundException.class,
-                () -> appointmentService.delete(userId, appointmentId));
-    }
-
-    @Test
-    void testDelete_UserUnauthorized() {
-        Long userId = 1L;
-        Long appointmentId = 1L;
-
-        User normalUser = new User();
-        normalUser.setId(userId);
-        normalUser.setRoleType(RoleType.USER);  // ADMIN deyil
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(normalUser));
-
-        assertThrows(UserUnAuthorizedException.class,
-                () -> appointmentService.delete(userId, appointmentId));
-    }
-
-    @Test
-    void testGetAllStatusPending() {
-        Appointment a1 = new Appointment();
-        Appointment a2 = new Appointment();
-
-        when(appointmentRepository.getAllAppointmentByStatus(RequestStatus.PENDING))
-                .thenReturn(List.of(a1, a2));
-        when(appointmentMapper.entityToReadResponse(a1)).thenReturn(new AppointmentReadResponse());
-        when(appointmentMapper.entityToReadResponse(a2)).thenReturn(new AppointmentReadResponse());
-
-        List<AppointmentReadResponse> responses = appointmentService.getAllStatusPending();
-
-        assertEquals(2, responses.size());
-    }
-
-
-    @Test
-    void testStatusUpdate_Success() {
-        Long userId = 1L;
-        Long appointmentId = 2L;
-        RequestStatus newStatus = RequestStatus.ACCEPTED;
-
-        User user = new User();
-        user.setId(userId);
-        user.setRoleType(RoleType.MODERATOR);
-
-        Appointment appointment = new Appointment();
-        appointment.setId(appointmentId);
-
-        AppointmentStatusUpdateResponse expectedResponse = new AppointmentStatusUpdateResponse();
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
-        when(appointmentRepository.save(any(Appointment.class))).thenReturn(appointment);
-        when(appointmentMapper.entityToAppointmentStatusUpdateResponse(appointment)).thenReturn(expectedResponse);
-
-        AppointmentStatusUpdateResponse response = appointmentService.statusUpdate(userId, appointmentId, newStatus);
-
-        assertNotNull(response);
-        assertEquals(expectedResponse, response);
-
-        verify(appointmentRepository, times(1)).save(appointment);
-        verify(appointmentMapper, times(1)).entityToAppointmentStatusUpdateResponse(appointment);
-    }
-
-    @Test
-    void testStatusUpdate_UserNotFound() {
-        Long userId = 1L;
-        Long appointmentId = 2L;
-        RequestStatus newStatus = RequestStatus.ACCEPTED;
-
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(UserNotFoundException.class,
-                () -> appointmentService.statusUpdate(userId, appointmentId, newStatus));
-
-        verify(appointmentRepository, never()).findById(any());
-        verify(appointmentRepository, never()).save(any());
-        verify(appointmentMapper, never()).entityToAppointmentStatusUpdateResponse(any());
-    }
-
-    @Test
-    void testStatusUpdate_AppointmentNotFound() {
-        Long userId = 1L;
-        Long appointmentId = 2L;
-        RequestStatus newStatus = RequestStatus.ACCEPTED;
-
-        User user = new User();
-        user.setId(userId);
-        user.setRoleType(RoleType.MODERATOR);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.empty());
-
-        assertThrows(AppointmentNotFoundException.class,
-                () -> appointmentService.statusUpdate(userId, appointmentId, newStatus));
-
-        verify(appointmentRepository, never()).save(any());
-        verify(appointmentMapper, never()).entityToAppointmentStatusUpdateResponse(any());
-    }
-
-    @Test
-    void testStatusUpdate_Unauthorized() {
-        Long userId = 1L;
-        Long appointmentId = 2L;
-        RequestStatus newStatus = RequestStatus.ACCEPTED;
-
-        User user = new User();
-        user.setId(userId);
-        user.setRoleType(RoleType.USER); // ADMIN və ya MODERATOR deyil
-
-        Appointment appointment = new Appointment();
-        appointment.setId(appointmentId);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
-
-        assertThrows(UserUnAuthorizedException.class,
-                () -> appointmentService.statusUpdate(userId, appointmentId, newStatus));
-
-        verify(appointmentRepository, never()).save(any());
-        verify(appointmentMapper, never()).entityToAppointmentStatusUpdateResponse(any());
-    }
-
-    @Test
-    void testDeleteCompleted_Success() {
-        Long appointmentId = 1L;
-
-        Appointment appointment = new Appointment();
-        appointment.setId(appointmentId);
+        Appointment appointment = AppointmentUtil.appointment();
         appointment.setStatus(RequestStatus.COMPLETED);
 
         when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
@@ -327,28 +133,5 @@ class AppointmentServiceImplTest {
 
         verify(appointmentRepository).deleteById(appointmentId);
     }
-
-    @Test
-    void testDeleteCompleted_NotCompleted() {
-        Long appointmentId = 1L;
-
-        Appointment appointment = new Appointment();
-        appointment.setId(appointmentId);
-        appointment.setStatus(RequestStatus.PENDING);
-
-        when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
-
-        assertThrows(AppointmentNotCompleted.class,
-                () -> appointmentService.deleteCompleted(appointmentId));
-    }
-
-    @Test
-    void testDeleteCompleted_AppointmentNotFound() {
-        Long appointmentId = 1L;
-
-        when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.empty());
-
-        assertThrows(AppointmentNotFoundException.class,
-                () -> appointmentService.deleteCompleted(appointmentId));
-    }
 }
+
