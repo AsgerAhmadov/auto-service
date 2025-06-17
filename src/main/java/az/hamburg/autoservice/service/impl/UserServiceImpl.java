@@ -168,14 +168,6 @@ public class UserServiceImpl implements UserService {
 
     }
 
-
 }
-
-//todo: kohne parolu baza ile yoxlamaq ( hash olunmus versiya )
-
-//todo: old password,new password,confirm password
-
-//salt mentiqi ile encription tetbiq etmek.(encription service yazilmalidir (password
-// encodr kitabxanasinin manual formasidir )-verify password mentiqi)
 
 
